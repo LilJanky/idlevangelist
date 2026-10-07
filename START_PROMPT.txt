@@ -1,0 +1,39 @@
+Read AGENTS.md and every file under /docs completely before making any
+implementation changes.
+
+Then build the complete Generation 1 vertical slice of IdleVangelist
+described by those specifications.
+
+Treat the specification files as authoritative. Work autonomously
+through architecture, implementation, original in-project pixel
+graphics, audio, content integration, balancing, automated testing,
+browser verification, debugging, and polish. Make reasonable
+implementation decisions where the specifications intentionally leave
+details open. Do not stop to ask preference questions unless you
+encounter a genuine blocking contradiction that cannot be resolved using
+the priority order in AGENTS.md.
+
+This is not a request for scaffolding, a mockup, or a minimal proof of
+concept. Deliver the playable first-pass Generation 1 game through the
+first Next Generation prestige, targeting a natural first-run duration
+of approximately 25–35 minutes.
+
+Important execution rules: - Do not use an external game engine. - Do
+not require external art/audio assets, CDNs, APIs, servers, or network
+services. - Keep the mobile portrait experience primary. - Keep
+simulation/state separated from rendering. - Put tunable economy/balance
+values in a centralized configuration. - Create and use a deterministic
+balance simulation/test harness. - Implement the debug tools specified
+so every major state can be tested quickly. - Run tests repeatedly while
+building. - Use the acceptance checklist in docs/ACCEPTANCE_TESTS.md as
+the shipping gate. - Fix regressions rather than merely documenting
+them. - Do not implement Generation 2 beyond the specified prestige
+payoff/preview. - Preserve the theology/content constraints in
+docs/THEOLOGY_GUARDRAILS.md even when simplifying implementation. -
+Create BUILD_NOTES.md before completion with run instructions, controls,
+implemented systems, test results, balance observations, deviations,
+known issues, and recommended next steps.
+
+Continue working until the Generation 1 build is complete, playable,
+tested, and the acceptance criteria have been evaluated. Do not declare
+completion merely because the app launches.

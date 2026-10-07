@@ -1,0 +1,20 @@
+{
+  "name": "idlevangelist",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "IdleVangelist Generation 1 vertical slice",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/",
+    "sim": "node tools/simulate.js",
+    "smoke": "node tools/smoke.mjs",
+    "playthrough": "node tools/playthrough.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
