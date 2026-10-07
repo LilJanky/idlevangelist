@@ -4,10 +4,11 @@ const SHOP_TYPES = ['bakery', 'pawn', 'laundromat', 'phone', 'pharmacy', 'noodle
 const ACCENTS = ['#4b6f7f', '#6d4652', '#8b7148', '#8f6676', '#54706c', '#7a5668'];
 // bakery warm tan, pawn deep red, laundromat sky blue, phone repair teal, pharmacy green, noodles orange, books plum, market olive
 const SHOP_COLOR = { bakery: '#a07a48', pawn: '#8a3a40', laundromat: '#4a82a8', phone: '#3a8a8c', pharmacy: '#4a8a5c', noodles: '#b8683a', books: '#7a4a78', market: '#7c8a40' };
-const NEAR_BASES = ['#32485b', '#435468', '#4e5d72', '#3a5063'];
+// the storefront row: brick red, slate teal, ochre, plum, deep blue; each building is a clearly different colour
+const NEAR_BASES = ['#6a3a42', '#2f5560', '#7a6038', '#563a62', '#34466e'];
 const NEAR_WARMS = ['#8f846f', '#a09783', '#b3a489', '#978776'];
-const MID_BASES = ['#2c3c58', '#334664', '#3a4d68'];
-const FAR_BASES = ['#242d50', '#2a3657', '#314060'];
+const MID_BASES = ['#3a3a6a', '#344a72', '#4a3a70'];
+const FAR_BASES = ['#3e3470', '#463a78', '#38407a'];
 
 const clamp01 = (t) => Math.min(1, Math.max(0, t));
 const sceneX = (w, t) => Math.round(w * t);
@@ -74,23 +75,23 @@ function drawCloud(ctx, x, y, palette, seed) {
 }
 
 function drawTowerWindows(ctx, b, y, fogT, localWarm, litBoost) {
-  const cols = Math.max(2, Math.floor((b.w - 4) / 4));
-  const step = cols > 3 ? 4 : 3;
+  const cols = Math.max(2, Math.floor((b.w - 4) / 5));
+  const step = cols > 2 ? 5 : 4;
   const litCold = mix('#91a7bc', '#f4cf9d', localWarm);
   const glowCold = mix('#314253', '#7e6542', localWarm);
   const darkWindow = mix('#0c1020', '#1d2833', 0.35);
-  for (let wy = y + 3; wy < b.baseY - 5; wy += 4) {
+  for (let wy = y + 4; wy < b.baseY - 6; wy += 5) {
     for (let col = 0; col < cols; col++) {
       const wx = b.x + 2 + col * step;
-      if (wx > b.x + b.w - 3) continue;
-      const lit = hash2(b.seed * 17 + wx, wy) < (litBoost + b.layer * 0.02);
+      if (wx > b.x + b.w - 4) continue;
+      const lit = hash2(b.seed * 17 + wx, wy) < (litBoost + b.layer * 0.006);
       ctx.fillStyle = darkWindow;
-      ctx.fillRect(wx, wy, 1 + (b.layer > 0 ? 1 : 0), 2);
+      ctx.fillRect(wx, wy, 2, 2);
       if (lit) {
         ctx.fillStyle = mix(glowCold, '#6f8090', fogT * 0.8);
-        ctx.fillRect(wx - 1, wy, 3, 2);
+        ctx.fillRect(wx - 1, wy, 4, 2);
         ctx.fillStyle = mix(litCold, '#b7c7d7', fogT * 0.55);
-        ctx.fillRect(wx, wy, 1 + (b.layer > 0 ? 1 : 0), 2);
+        ctx.fillRect(wx, wy, 2, 2);
       }
     }
   }
@@ -98,31 +99,31 @@ function drawTowerWindows(ctx, b, y, fogT, localWarm, litBoost) {
 
 function drawUpperFloorWindows(ctx, b, topY, localWarm, restored) {
   const cols = b.upperCols;
-  const step = Math.max(4, Math.floor((b.w - 4) / cols));
+  const step = Math.max(5, Math.floor((b.w - 4) / cols));
   const warmBias = Math.max(localWarm, 0.24 + restored * 0.1);
   const litColor = mix('#a8bfd1', '#ffd2a1', warmBias);
   const glowColor = mix('#3c5672', '#8b6841', warmBias);
   const frame = mix('#16192a', '#574b40', restored * 0.2);
   const darkWindow = mix('#0e1220', '#20303a', localWarm * 0.2);
-  for (let row = 0, wy = topY + 4; wy < b.baseY - b.groundH - 2; row++, wy += 5) {
+  for (let row = 0, wy = topY + 5; wy < b.baseY - b.groundH - 2; row++, wy += 6) {
     for (let col = 0; col < cols; col++) {
       const wx = b.x + 2 + col * step;
-      if (wx > b.x + b.w - 4) continue;
-      const litChance = 0.22 + localWarm * 0.28 + restored * 0.2 + (row === 0 ? 0.08 : 0);
+      if (wx > b.x + b.w - 5) continue;
+      const litChance = 0.08 + localWarm * 0.14 + restored * 0.14 + (row === 0 ? 0.04 : 0);
       const lit = hash2(b.seed * 13 + col, row + 91) < litChance;
       ctx.fillStyle = frame;
-      ctx.fillRect(wx - 1, wy - 1, 4, 4);
+      ctx.fillRect(wx - 1, wy - 1, 5, 4);
       ctx.fillStyle = darkWindow;
-      ctx.fillRect(wx, wy, 2, 2);
+      ctx.fillRect(wx, wy, 3, 2);
       if (lit) {
         ctx.fillStyle = glowColor;
-        ctx.fillRect(wx - 1, wy, 4, 2);
+        ctx.fillRect(wx - 1, wy, 5, 2);
         ctx.fillStyle = litColor;
-        ctx.fillRect(wx, wy, 2, 2);
+        ctx.fillRect(wx, wy, 3, 2);
       }
       if (hash2(b.seed * 19 + col, row + 103) > 0.76) {
-        ctx.fillStyle = mix('#616e7d', '#ceb997', localWarm * 0.45);
-        ctx.fillRect(wx, wy + 2, 2, 1);
+        ctx.fillStyle = mix('#616e7d', '#ceb997', localWarm * 0.3);
+        ctx.fillRect(wx, wy + 2, 3, 1);
       }
     }
   }
@@ -312,6 +313,8 @@ function drawNearBuilding(ctx, b, groundTop, wp, W) {
   const right = mix(body, '#12102a', 0.42);
   const brick = mix('#273548', '#a5947d', restored * 0.5);
 
+  ctx.fillStyle = mix('#0e0b1e', '#4a4038', restored * 0.5);
+  ctx.fillRect(b.x - 1, y - 1, b.w + 2, b.h + 1);
   ctx.fillStyle = body;
   ctx.fillRect(b.x, y, b.w, b.h);
   ctx.fillStyle = left;
@@ -347,7 +350,7 @@ function drawFarTower(ctx, b, wp, fogT) {
   const base = b.layer === 0 ? FAR_BASES[b.tone % FAR_BASES.length] : MID_BASES[b.tone % MID_BASES.length];
   const warm = b.layer === 0 ? '#7d7265' : '#897b67';
   const body = mix(base, warm, wp.restoration * 0.46);
-  const mid = mix(body, '#6b7a90', fogT);
+  const mid = mix(body, '#8a7ab0', fogT * (b.layer === 0 ? 1.0 : 0.7));
   ctx.fillStyle = mid;
   ctx.fillRect(b.x, y, b.w, b.h);
   ctx.fillStyle = mix(mid, '#b8cce0', 0.1);
@@ -409,34 +412,12 @@ function drawStreetFurniture(ctx, W, groundTop, restored) {
   ctx.fillRect(benchX + 1, groundTop + 13, 1, 4);
   ctx.fillRect(benchX + 7, groundTop + 13, 1, 4);
 
-  const bollardX = sceneX(W, 0.53);
-  ctx.fillStyle = mix('#1b1f28', '#706354', restored * 0.24);
-  for (let i = 0; i < 3; i++) ctx.fillRect(bollardX + i * 4, groundTop + 8, 1, 6);
-
-  const rackX = sceneX(W, 0.56);
-  ctx.fillStyle = mix('#253443', '#7e8fa0', restored * 0.18);
-  ctx.fillRect(rackX, groundTop + 15, 6, 1);
-  ctx.fillRect(rackX + 1, groundTop + 14, 1, 3);
-  ctx.fillRect(rackX + 4, groundTop + 14, 1, 3);
-
-  const scooterX = sceneX(W, 0.78);
-  ctx.fillStyle = mix('#5a3b40', '#c98d63', restored * 0.32);
-  ctx.fillRect(scooterX, groundTop + 17, 5, 2);
-  ctx.fillRect(scooterX + 1, groundTop + 16, 2, 1);
-  ctx.fillRect(scooterX + 5, groundTop + 16, 1, 2);
-  ctx.fillStyle = mix('#1a1e29', '#5d6672', restored * 0.2);
-  ctx.fillRect(scooterX, groundTop + 19, 1, 1);
-  ctx.fillRect(scooterX + 4, groundTop + 19, 1, 1);
-
   const hydrantX = sceneX(W, 0.73);
   ctx.fillStyle = mix('#6c3b42', '#c96b59', restored * 0.34);
   ctx.fillRect(hydrantX, groundTop + 15, 3, 5);
   ctx.fillRect(hydrantX - 1, groundTop + 17, 5, 1);
   ctx.fillRect(hydrantX + 1, groundTop + 14, 1, 1);
 
-  ctx.fillStyle = mix('#294034', '#48734f', restored * 0.3);
-  ctx.fillRect(sceneX(W, 0.91), groundTop + 27, 8, 3);
-  ctx.fillRect(sceneX(W, 0.94), groundTop + 25, 6, 3);
 }
 
 function drawPuddlesStatic(ctx, W, groundTop, H, wp) {
@@ -476,7 +457,7 @@ export function createSceneryBuildings(W) {
       w,
       h: groundH + upperH,
       groundH,
-      upperCols: Math.max(2, Math.floor((w - 5) / 4)),
+      upperCols: Math.max(2, Math.floor((w - 6) / 7)),
       seed: i,
       tone: Math.floor(hash2(i, 4) * NEAR_BASES.length),
       accent: 0,
@@ -538,25 +519,25 @@ function drawSkyStatic(ctx, W, H, groundTop, wp) {
   const R = wp.restoration;
   const stops = [0, Math.round(groundTop * 0.12), Math.round(groundTop * 0.28), Math.round(groundTop * 0.48), Math.round(groundTop * 0.68), Math.round(groundTop * 0.84), groundTop];
   const base = [
-    mix('#0a0a18', '#82a7cf', R),
-    mix('#12102a', '#8eb3da', R),
-    mix('#201b40', '#7a97bf', R),
-    mix('#2a2850', '#6883a8', R),
-    mix('#3c5870', '#d9cdb8', R),
-    mix('#6a4a6a', '#efc797', R),
+    mix('#120f34', '#82a7cf', R),
+    mix('#1c1648', '#8eb3da', R),
+    mix('#2e2160', '#7a97bf', R),
+    mix('#4a2f78', '#6883a8', R),
+    mix('#7a4a88', '#d9cdb8', R),
+    mix('#c0687a', '#efc797', R),
   ].map((c, i) => mix(c, '#090916', night * (0.75 - i * 0.08)));
   fillVerticalBands(ctx, W, stops, base);
-  const glow = mix('#c08868', '#f5dfae', R);
+  const glow = mix('#e0905c', '#f5dfae', R);
   ctx.fillStyle = glow;
-  ctx.fillRect(0, groundTop - 7, W, 7);
+  ctx.fillRect(0, groundTop - 9, W, 9);
   ctx.fillStyle = mix('#e0b090', '#fff1c4', R * 0.6);
   ctx.fillRect(0, groundTop - 3, W, 1);
   ditherRect(ctx, 0, groundTop - 12, W, 5, mix(glow, base[4], 0.52), 1);
 
-  for (let i = 0; i < 6; i++) {
-    const x = Math.round((((i * 27) + 9) % (W + 24)) - 12);
-    const y = 6 + i * 5 + (i % 2);
-    const tone = i < 2 ? 0 : i < 4 ? 1 : 2;
+  for (let i = 0; i < 3; i++) {
+    const x = Math.round(((i * 52) + 8) % (W + 10) - 14);
+    const y = 8 + i * 11;
+    const tone = i;
     const cloudBase = mix(['#4d5773', '#616a81', '#788290'][tone], '#ede5dc', R * 0.5);
     const palette = {
       shadow: mix(cloudBase, '#151735', night * 0.45),
@@ -582,17 +563,9 @@ function drawSkylineStatic(ctx, W, groundTop, wp, buildings) {
     b.baseY = groundTop;
     drawNearBuilding(ctx, b, groundTop, wp, W);
   }
-  ctx.fillStyle = mix('#1a2435', '#746a5f', wp.restoration * 0.22);
-  for (let x = sceneX(W, 0.08); x < sceneX(W, 0.94); x += sceneSpan(W, 0.1, 10)) {
-    ctx.fillRect(x, groundTop + 1, 1, 17);
-  }
-  ctx.fillStyle = mix('#607086', '#baaa8b', wp.restoration * 0.18);
-  for (let x = sceneX(W, 0.08); x < sceneX(W, 0.94); x += 4) {
-    const y0 = groundTop + 3 + ((x / 4) & 1);
-    ctx.fillRect(x, y0, 1, 1);
-    ctx.fillRect(x + 2, y0 + 2, 1, 1);
-    ctx.fillRect(x, y0 + 4, 1, 1);
-  }
+  ctx.fillStyle = mix('#1a2435', '#746a5f', wp.restoration * 0.18);
+  ctx.fillRect(sceneX(W, 0.06), groundTop + 6, sceneSpan(W, 0.88, 96), 1);
+  for (let x = sceneX(W, 0.1); x < sceneX(W, 0.92); x += sceneSpan(W, 0.3, 30)) ctx.fillRect(x, groundTop + 4, 1, 4);
   ctx.fillStyle = mix('#253345', '#496b4e', wp.restoration * 0.3);
   ctx.fillRect(sceneX(W, 0.96), groundTop - 30, sceneSpan(W, 0.05, 6), 24);
   ctx.fillRect(sceneX(W, 0.94), groundTop - 38, sceneSpan(W, 0.1, 12), 10);
@@ -615,72 +588,45 @@ function drawGroundStatic(ctx, W, H, groundTop, feetY, wp, buildings) {
   ctx.fillStyle = mix('#323948', '#a39782', R);
   ctx.fillRect(0, gutterY, W, 1);
 
-  for (let row = 0, y = groundTop + 4; y < curbY - 1; row++, y += 4) {
+  for (let row = 0, y = groundTop + 5; y < curbY - 1; row++, y += 5) {
     ctx.fillStyle = mix('#556777', '#d9cbb1', R * 0.72);
     ctx.fillRect(0, y, W, 1);
-    const start = row % 2 ? 4 : 0;
+    const start = row % 2 ? 9 : 0;
     ctx.fillStyle = mix('#435463', '#c1b298', R * 0.55);
-    for (let x = start; x < W; x += 8) ctx.fillRect(x, y - 2, 1, 3);
+    for (let x = start; x < W; x += 18) ctx.fillRect(x, y - 4, 1, 4);
   }
 
   ctx.fillStyle = mix('#2a3140', '#8f8779', R);
   ctx.fillRect(0, roadTop, W, H - roadTop);
-  ctx.fillStyle = mix('#31394a', '#948a79', R * 0.7);
-  ctx.fillRect(0, roadTop, W, 12);
-  ctx.fillStyle = mix('#384153', '#9b907f', R * 0.55);
-  ctx.fillRect(0, feetY - 26, W, 8);
-  ctx.fillStyle = mix('#252d3b', '#7d756a', R * 0.45);
+  ctx.fillStyle = mix('#31394a', '#948a79', R * 0.55);
+  ctx.fillRect(0, roadTop + 2, W, 10);
+  ctx.fillStyle = mix('#364052', '#9d9280', R * 0.45);
+  ctx.fillRect(0, feetY - 24, W, 7);
+  ctx.fillStyle = mix('#242c3a', '#786f63', R * 0.38);
   ctx.fillRect(0, feetY + 10, W, H - feetY - 10);
 
-  const seams = [
-    roadTop + 9,
-    roadTop + 23,
-    roadTop + 41,
-    roadTop + 64,
-    roadTop + 92,
-    Math.min(H - 18, roadTop + 126),
-  ];
-  ctx.fillStyle = mix('#414b5c', '#a49782', R * 0.35);
-  for (const y of seams) if (y < H - 6) ctx.fillRect(0, y, W, 1);
+  ctx.fillStyle = mix('#3c4657', '#8f8473', R * 0.22);
+  ctx.fillRect(0, roadTop + 18, W, 1);
+  ctx.fillRect(0, feetY - 6, W, 1);
 
-  ctx.fillStyle = mix('#354155', '#c8b59a', R * 0.18);
-  for (let i = 0; i < 5; i++) {
-    const x = sceneX(W, 0.12 + i * 0.18);
-    const y = roadTop + 12 + i * 12;
-    ctx.fillRect(x, y, sceneSpan(W, 0.05, 5), 1);
-    ctx.fillRect(x + 2, y + 1, sceneSpan(W, 0.04, 4), 1);
-  }
-  for (let i = 0; i < 4; i++) {
-    const x = sceneX(W, 0.1 + i * 0.22);
-    const y = roadTop + 18 + i * 16;
-    ctx.fillStyle = mix('#4b5768', '#dbc8a8', R * 0.12);
-    ctx.fillRect(x, y, 1, 8 + i * 2);
-  }
-  for (const rx of [0.17, 0.36, 0.58, 0.83]) {
-    const x = sceneX(W, rx);
-    const warm = Math.max(wp.restoration * 0.76, stationWarmAt(x, wp.warmth, W));
-    ctx.fillStyle = `rgba(${warm > 0.2 ? '223,181,120' : '160,190,216'},${0.07 + warm * 0.08})`;
-    ctx.fillRect(x, roadTop + 4, 1, 8);
-    ctx.fillRect(x + 1, roadTop + 8, 1, 4);
-  }
+  const laneY = Math.round((roadTop + feetY) / 2);
+  const dashW = sceneSpan(W, 0.12, 12);
+  const gap = sceneSpan(W, 0.09, 9);
+  ctx.fillStyle = mix('#555f6f', '#c7b395', R * 0.18);
+  for (let x = sceneX(W, 0.08); x < W - dashW; x += dashW + gap) ctx.fillRect(x, laneY, dashW, 1);
 
-  const reflectionXs = [0.04, 0.31, 0.65, 0.93];
+  const sheenYs = [roadTop + 7, laneY + 5, feetY - 18];
+  ctx.fillStyle = 'rgba(150,176,205,0.07)';
+  for (const y of sheenYs) ctx.fillRect(0, y, W, 4);
+
+  const reflectionXs = [0.04, 0.65, 0.93];
   for (const rx of reflectionXs) {
     const x = sceneX(W, rx);
     const warm = Math.max(wp.restoration * 0.74, stationWarmAt(x, wp.warmth, W));
     const color = warm > 0.2 ? '255,198,120' : '170,200,228';
-    ctx.fillStyle = `rgba(${color},${0.08 + warm * 0.08})`;
-    ctx.fillRect(x, roadTop + 5, 1, 9);
-    ctx.fillRect(x, roadTop + 16, 1, 8);
-    ctx.fillRect(x + 1, roadTop + 20, 1, 6);
-  }
-  for (const b of buildings.near) {
-    const x = b.x + Math.floor(b.w * 0.45);
-    const warm = Math.max(0.18, stationWarmAt(x, wp.warmth, W));
-    if (warm < 0.16 && !b.closed) continue;
-    ctx.fillStyle = `rgba(${warm > 0.24 ? '235,178,102' : '148,182,214'},${0.05 + warm * 0.08})`;
-    ctx.fillRect(x, roadTop + 7, 1, 8);
-    ctx.fillRect(x, roadTop + 22, 1, 7);
+    ctx.fillStyle = `rgba(${color},${0.025 + warm * 0.03})`;
+    ctx.fillRect(x, roadTop + 8, 1, 6);
+    ctx.fillRect(x, laneY + 5, 1, 5);
   }
 
   drawStreetFurniture(ctx, W, groundTop, R);

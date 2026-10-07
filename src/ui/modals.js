@@ -9,7 +9,8 @@ const verseBlock = (v) => h('div', { class: 'verse' }, `â€œ${v.text.replace(/^â€
 export function introModal({ onStart }) {
   return h(
     'div',
-    { class: 'modal', role: 'dialog', 'aria-label': 'Welcome' },
+    { class: 'modal intro', role: 'dialog', 'aria-label': 'Welcome' },
+    h('div', { class: 'emblem', 'aria-hidden': 'true' }),
     h('h2', { text: INTRO.title }),
     ...INTRO.lines.map((l) => h('p', { text: l })),
     verseBlock(INTRO.verse),

@@ -494,6 +494,12 @@ After the experiments with authored sheets (a hosted image generator gave blurry
 
 Measured in a 22-minute hybrid run (pairs of walkers in the same lane within 0.07 of the width, i.e. overlapping sprites): the worst case was 12 and came from the Professor's gathering, where everyone who joined the standing crowd stopped at the same spot (about 0.39) and stacked up. Fixes in `crowd.js`: gathering walkers only stop in an open spot; new walkers and event arrivals enter in the lane with the most room (`placeInRoomiestLane`); a bus pack fans out over the three lanes; and a walker queues behind a slower walker ahead of them in the same lane (`balance.crowd.queueGap`) instead of walking through them. Result: average overlaps 1.6 down to 1.4 and the worst case 12 down to 9 (an event moment), with the lane split an even 34/33/33. Balance is unchanged (hybrid 25-28 min). Tests: `tests/crowd-density.test.js`. The street is still full by design (up to ~20 on screen); lowering `crowd.cap` (14) is the next lever if it should feel emptier.
 
+## Background and interface evolution
+
+**Backdrop** (`scenery.js`, `renderer.js`), restyled to match the chunky figures: a saturated dusk sky (violet to a warm coral band at the horizon, three big clouds instead of six small ones), far towers in hazy purple and blue, and a storefront row in clearly different building colours (brick red, slate teal, ochre, plum, deep blue) with a dark outline on each mass. The scatter that made the street noisy is gone: rain ripples and splashes are flat dashes (they were plus shapes), the bollards, bike rack, scooter and shrub strip were removed, the fence is one thin rail with a few posts, and the sidewalk uses large paving slabs.
+
+**Interface**: the scene is framed with a vignette and a dark base line; stat tiles have a coloured edge (gold for Seeds, teal for Provisions); the goal reads in two lines with a sprout icon and a segmented gold bar; Proclaim the Word charges as a dark gauge that fills with gold segments and shows a small book beside its status; the active tab has a gold notch; and the title screen has a glowing cross-and-sprout emblem, a larger title, a lighter veil so the city shows behind it, and a pulsing Begin button.
+
 ## Implemented systems (overview)
 
 Config (`src/config/balance.js`) · pure economy · simulation (`systems/game.js` WORD/conversations/boss, `street.js` streak/Momentum/Stand Firm/WORD

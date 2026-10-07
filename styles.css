@@ -617,3 +617,33 @@ body.reduce-motion .floater.engage.crit, body.reduce-motion .floater.chain, body
   #word-slam.t2 .ws-mult, #word-slam.t3 .ws-mult, #word-slam.t4 .ws-mult { font-size: 42px; }
   #word-slam .ws-total, #word-slam.t2 .ws-total, #word-slam.t3 .ws-total, #word-slam.t4 .ws-total { font-size: 21px; }
 }
+
+/* ================= Interface polish: framing, a real charge gauge, a clearer goal, a title with presence ================= */
+#scene { border-bottom: 3px solid #0a0b10; box-shadow: 0 1px 0 #3a4154; }
+#scene::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(rgba(6,8,14,.5), rgba(6,8,14,0) 22px, rgba(6,8,14,0) calc(100% - 26px), rgba(6,8,14,.5)); }
+#hud .stat { border-left: 3px solid #6a5a2c; }
+#stat-funds { border-left-color: #2f6a66 !important; }
+
+/* the goal reads in full (two lines) and its bar is a chunky segmented gauge */
+.goal-text { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+.goal-label::before { content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -2px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' shape-rendering='crispEdges'><rect x='5' y='6' width='2' height='5' fill='%236a9a4a'/><rect x='3' y='3' width='3' height='3' fill='%238aba5a'/><rect x='6' y='2' width='3' height='3' fill='%239ada6a'/></svg>") center / contain no-repeat; image-rendering: pixelated; }
+.goal-track { height: 9px; }
+.goal-track i { background: repeating-linear-gradient(90deg, #e8c460 0 6px, #b8913a 6px 8px); box-shadow: inset 0 2px 0 rgba(255,255,255,.25); }
+
+/* Proclaim the Word while it charges: a dark gauge that fills with gold segments, with the book beside its status */
+#btn-word.charging { background: #1b2133; box-shadow: inset 0 3px 0 #2f3a56, inset 0 -4px 0 #0f121b, 0 2px 0 var(--ink); }
+#btn-word .cd { background: repeating-linear-gradient(90deg, #e8c460 0 6px, #b8913a 6px 8px); opacity: .5; height: 100%; }
+#btn-word.charging .a-title { color: #f2e6c0; }
+#word-sub::before { content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -2px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' shape-rendering='crispEdges'><rect x='1' y='1' width='10' height='10' fill='%233a2418'/><rect x='2' y='2' width='8' height='8' fill='%237a5238'/><rect x='5' y='3' width='2' height='6' fill='%23e0c070'/><rect x='4' y='5' width='4' height='2' fill='%23e0c070'/></svg>") center / contain no-repeat; image-rendering: pixelated; }
+
+/* navigation: the active tab gets a gold notch */
+.nav-btn.active::before { content: ''; position: absolute; top: -4px; left: 50%; width: 16px; height: 4px; margin-left: -8px; background: var(--gold); box-shadow: 0 -1px 0 #fff0b8; }
+
+/* title screen: lighter veil so the city shows, an emblem, and a button that breathes */
+#overlay:has(.modal.intro) { background: rgba(6,8,16,.5); }
+.modal.intro { border-color: #6a5a2c; }
+.modal.intro .emblem { width: 72px; height: 72px; margin: -4px auto 0; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' shape-rendering='crispEdges'><rect x='11' y='2' width='2' height='14' fill='%23f2d98a'/><rect x='7' y='6' width='10' height='2' fill='%23f2d98a'/><rect x='11' y='2' width='1' height='14' fill='%23fff0b8'/><rect x='7' y='6' width='10' height='1' fill='%23fff0b8'/><rect x='11' y='16' width='2' height='6' fill='%236a9a4a'/><rect x='7' y='14' width='4' height='3' fill='%238aba5a'/><rect x='13' y='12' width='4' height='3' fill='%239ada6a'/></svg>") center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(0 0 10px rgba(242,217,138,.55)); }
+.modal.intro h2 { text-align: center; font-size: 28px; letter-spacing: .06em; }
+.modal.intro .btn { min-height: 52px; font-size: 14px; }
+body:not(.reduce-motion) .modal.intro .btn.gold { animation: beginPulse 1.6s ease-in-out infinite; }
+@keyframes beginPulse { 50% { filter: brightness(1.15); } }

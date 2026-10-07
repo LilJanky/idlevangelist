@@ -77,20 +77,11 @@ function drawCloudCluster(ctx, x, y, palette) {
 }
 
 function drawRipple(ctx, x, y, phase, color) {
+  // a flat widening oval: two thin lines, never a plus
   const r = 1 + Math.floor(phase * 3);
   ctx.fillStyle = color;
-  ctx.fillRect(x - r, y, r - 1, 1);
-  ctx.fillRect(x + 2, y, r - 1, 1);
-  ctx.fillRect(x, y - r, 1, 1);
-  ctx.fillRect(x + 1, y - r, 1, 1);
-  ctx.fillRect(x, y + r, 1, 1);
-  ctx.fillRect(x + 1, y + r, 1, 1);
-  if (r > 1) {
-    ctx.fillRect(x - r + 1, y - 1, 1, 1);
-    ctx.fillRect(x - r + 1, y + 1, 1, 1);
-    ctx.fillRect(x + r, y - 1, 1, 1);
-    ctx.fillRect(x + r, y + 1, 1, 1);
-  }
+  ctx.fillRect(x - r, y, r * 2 + 1, 1);
+  if (r > 1) ctx.fillRect(x - r + 1, y + 1, r * 2 - 1, 1);
 }
 
 function hash2(a, b) {
@@ -576,20 +567,13 @@ export class Renderer {
     }
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    for (const lx of lampXs(W)) {
+    for (const lx of lampXs(W).slice(1, 4)) {
       const warm = Math.max(0.3, stationWarmAt(lx, wp.warmth, W));
       const glow = '255,190,112';
-      ctx.fillStyle = `rgba(${glow},${0.08 + warm * 0.08})`;
-      ctx.fillRect(lx, groundTop + 14, 2, 22);
-      ctx.fillStyle = `rgba(${glow},${0.04 + warm * 0.05})`;
-      ctx.fillRect(lx - 2, groundTop + 18, 5, 28);
-    }
-    for (const b of this.buildings.near) {
-      const rx = b.x + Math.floor(b.w * 0.5);
-      const warm = Math.max(0.2, stationWarmAt(rx, wp.warmth, W));
-      const glow = warm > 0.22 ? '236,176,96' : '186,206,232';
-      ctx.fillStyle = `rgba(${glow},${0.05 + warm * 0.06})`;
-      ctx.fillRect(rx, groundTop + 14, 1, 14);
+      ctx.fillStyle = `rgba(${glow},${0.025 + warm * 0.03})`;
+      ctx.fillRect(lx, groundTop + 18, 1, 10);
+      ctx.fillStyle = `rgba(${glow},${0.015 + warm * 0.02})`;
+      ctx.fillRect(lx, groundTop + 28, 1, 6);
     }
     ctx.restore();
     for (const puddle of PUDDLES) {
@@ -643,19 +627,18 @@ export class Renderer {
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       ctx.fillStyle = `rgba(${glow},${halo * 0.6})`;
-      ctx.fillRect(headX + 2, headY + 1, 9, 9);
-      // soft stepped halo (translucent steps read cleaner than dither)
-      ctx.fillStyle = `rgba(${glow},${halo * 0.3})`;
-      ctx.fillRect(headX - 3, headY, 18, 12);
-      ctx.fillStyle = `rgba(${glow},${halo * 0.4})`;
-      ctx.fillRect(headX, headY + 2, 12, 8);
-      const poolW = 16 + Math.round(warm * 24);
-      const poolX = headX - 7;
+      ctx.fillRect(headX + 3, headY + 2, 7, 7);
+      ctx.fillStyle = `rgba(${glow},${halo * 0.24})`;
+      ctx.fillRect(headX - 1, headY + 1, 12, 8);
+      ctx.fillStyle = `rgba(${glow},${halo * 0.14})`;
+      ctx.fillRect(headX - 3, headY, 16, 10);
+      const poolW = 12 + Math.round(warm * 16);
+      const poolX = headX - 5;
       const poolY = groundTop + 8;
-      ctx.fillStyle = `rgba(${glow},${halo * 0.38})`;
-      ctx.fillRect(poolX, poolY, poolW, 5);
-      ctx.fillStyle = `rgba(${glow},${halo * 0.22})`;
-      ctx.fillRect(poolX - 3, poolY + 4, poolW + 7, 7);
+      ctx.fillStyle = `rgba(${glow},${halo * 0.24})`;
+      ctx.fillRect(poolX, poolY, poolW, 4);
+      ctx.fillStyle = `rgba(${glow},${halo * 0.12})`;
+      ctx.fillRect(poolX - 2, poolY + 3, poolW + 4, 5);
       ctx.restore();
       ctx.fillStyle = '#ffe0ab';
       ctx.fillRect(headX + 6, headY + 1, 2, 1);
@@ -1588,7 +1571,7 @@ export class Renderer {
       ctx.fillRect(px, y, 1, 3);
       ctx.fillRect(px + wind, y + 1, 1, 2);
     }
-    const splashCount = this.reducedMotion ? 5 : 10;
+    const splashCount = this.reducedMotion ? 3 : 6;
     for (let i = 0; i < splashCount; i++) {
       const sx = 5 + Math.floor(hash2(i, 44) * (this.W - 10));
       const sy = this.groundTop + 18 + Math.floor(hash2(i, 51) * (this.H - this.groundTop - 24));
@@ -1596,10 +1579,7 @@ export class Renderer {
       if (phase > 0.62) continue;
       ctx.fillStyle = `rgba(198,212,232,${0.08 + strength * 0.12})`;
       ctx.fillRect(sx - 1, sy, 3, 1);
-      if (!this.reducedMotion && phase > 0.25) {
-        ctx.fillRect(sx, sy - 1, 1, 1);
-        ctx.fillRect(sx, sy + 1, 1, 1);
-      }
+      if (!this.reducedMotion && phase > 0.25) ctx.fillRect(sx - 2, sy + 1, 5, 1);
     }
   }
 
