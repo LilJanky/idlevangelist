@@ -74,57 +74,38 @@ function drawCloud(ctx, x, y, palette, seed) {
   }
 }
 
-function drawTowerWindows(ctx, b, y, fogT, localWarm, litBoost) {
+function drawTowerWindows(ctx, b, y, fogT, localWarm, litBoost, body) {
   const cols = Math.max(2, Math.floor((b.w - 4) / 5));
   const step = cols > 2 ? 5 : 4;
-  const litCold = mix('#91a7bc', '#f4cf9d', localWarm);
-  const glowCold = mix('#314253', '#7e6542', localWarm);
-  const darkWindow = mix('#0c1020', '#1d2833', 0.35);
+  const dark = mix(body, '#16123c', 0.34);
+  const lit = mix(mix('#ffd37a', '#ffe9b0', localWarm * 0.5), body, fogT * 0.4);
   for (let wy = y + 4; wy < b.baseY - 6; wy += 5) {
     for (let col = 0; col < cols; col++) {
       const wx = b.x + 2 + col * step;
       if (wx > b.x + b.w - 4) continue;
-      const lit = hash2(b.seed * 17 + wx, wy) < (litBoost + b.layer * 0.006);
-      ctx.fillStyle = darkWindow;
+      ctx.fillStyle = hash2(b.seed * 17 + wx, wy) < litBoost + 0.2 ? lit : dark;
       ctx.fillRect(wx, wy, 2, 2);
-      if (lit) {
-        ctx.fillStyle = mix(glowCold, '#6f8090', fogT * 0.8);
-        ctx.fillRect(wx - 1, wy, 4, 2);
-        ctx.fillStyle = mix(litCold, '#b7c7d7', fogT * 0.55);
-        ctx.fillRect(wx, wy, 2, 2);
-      }
     }
   }
 }
 
-function drawUpperFloorWindows(ctx, b, topY, localWarm, restored) {
+function drawUpperFloorWindows(ctx, b, topY, localWarm, restored, body) {
   const cols = b.upperCols;
   const step = Math.max(5, Math.floor((b.w - 4) / cols));
-  const warmBias = Math.max(localWarm, 0.24 + restored * 0.1);
-  const litColor = mix('#a8bfd1', '#ffd2a1', warmBias);
-  const glowColor = mix('#3c5672', '#8b6841', warmBias);
-  const frame = mix('#16192a', '#574b40', restored * 0.2);
-  const darkWindow = mix('#0e1220', '#20303a', localWarm * 0.2);
+  const warmBias = Math.max(localWarm, 0.3 + restored * 0.1);
+  const litColor = mix('#ffd27a', '#ffe8b8', warmBias * 0.5);
+  const dark = mix(body, '#100c28', 0.55);
+  const frame = mix(body, '#100c28', 0.25);
   for (let row = 0, wy = topY + 5; wy < b.baseY - b.groundH - 2; row++, wy += 6) {
     for (let col = 0; col < cols; col++) {
       const wx = b.x + 2 + col * step;
       if (wx > b.x + b.w - 5) continue;
-      const litChance = 0.08 + localWarm * 0.14 + restored * 0.14 + (row === 0 ? 0.04 : 0);
+      const litChance = 0.3 + localWarm * 0.15 + restored * 0.2;
       const lit = hash2(b.seed * 13 + col, row + 91) < litChance;
       ctx.fillStyle = frame;
       ctx.fillRect(wx - 1, wy - 1, 5, 4);
-      ctx.fillStyle = darkWindow;
+      ctx.fillStyle = lit ? litColor : dark;
       ctx.fillRect(wx, wy, 3, 2);
-      if (lit) {
-        ctx.fillStyle = glowColor;
-        ctx.fillRect(wx - 1, wy, 5, 2);
-        ctx.fillStyle = litColor;
-        ctx.fillRect(wx, wy, 3, 2);
-      }
-      if (hash2(b.seed * 19 + col, row + 103) > 0.76) {
-        ctx.fillStyle = mix('#616e7d', '#ceb997', localWarm * 0.3);
-        ctx.fillRect(wx, wy + 2, 3, 1);
-      }
     }
   }
 }
@@ -180,16 +161,15 @@ function drawSignIcon(ctx, x, y, type, color) {
 }
 
 function drawAwning(ctx, b, y, localWarm, restored) {
-  const awningY = y + b.h - b.groundH - 4;
+  const awningY = b.baseY - b.groundH - 4;
   const accent = mix(SHOP_COLOR[b.shopType] || ACCENTS[b.accent], '#d6b48d', restored * 0.3);
-  ctx.fillStyle = mix('#1c2330', accent, 0.9);
-  ctx.fillRect(b.x + 1, awningY, b.w - 2, 4);
-  ctx.fillStyle = mix('#c2ced8', '#f1dfc0', localWarm * 0.22 + restored * 0.2);
-  for (let x = b.x + 2; x < b.x + b.w - 2; x += 4) ctx.fillRect(x, awningY + 1, 2, 1);
-  ctx.fillStyle = mix('#0f1420', '#f1dfc0', 0.12 + localWarm * 0.08);
-  for (let x = b.x + 2; x < b.x + b.w - 2; x += 4) ctx.fillRect(x + 1, awningY + 2, 1, 2);
-  ctx.fillStyle = mix('#0f1420', accent, 0.42);
-  for (let x = b.x + 1; x < b.x + b.w - 2; x += 3) ctx.fillRect(x, awningY + 4, 1, 1);
+  const cream = mix('#e8e2d4', '#f6ecd6', restored * 0.4);
+  ctx.fillStyle = mix(accent, '#100c28', 0.25);
+  ctx.fillRect(b.x + 1, awningY + 3, b.w - 2, 1);
+  for (let x = b.x + 1, i = 0; x < b.x + b.w - 1; x += 3, i++) {
+    ctx.fillStyle = i % 2 ? cream : accent;
+    ctx.fillRect(x, awningY, Math.min(3, b.x + b.w - 1 - x), 3);
+  }
 }
 
 function drawStorefront(ctx, b, y, localWarm, restored) {
@@ -202,11 +182,11 @@ function drawStorefront(ctx, b, y, localWarm, restored) {
   ctx.fillRect(b.x + 1, storefrontY, b.w - 2, 1);
 
   const warmBias = Math.max(localWarm, 0.34 + restored * 0.14);
-  const windowColor = mix('#315372', '#ffd8ab', warmBias);
-  const windowGlow = mix('#5a86a9', '#d59661', warmBias);
-  const coldLamp = mix('#c1dbf0', '#ffd9a7', warmBias);
-  const darkGlass = mix('#111725', '#2e3c48', restored * 0.24);
-  const shutter = mix('#394355', '#9c8e7b', restored * 0.35);
+  const glass = mix('#e2a24e', '#ffd88a', warmBias * 0.5);
+  const glassTop = mix(glass, '#fff0c0', 0.45);
+  const shelf = mix(glass, '#5a2a1c', 0.5);
+  const frameC = mix('#100c28', accent, 0.25);
+  const shutter = mix('#4a5570', '#9c8e7b', restored * 0.35);
 
   const doorW = 4;
   const doorX = b.doorSide === 'left' ? b.x + 2 : b.x + b.w - 6;
@@ -217,60 +197,39 @@ function drawStorefront(ctx, b, y, localWarm, restored) {
   if (b.closed && restored < 0.82) {
     ctx.fillStyle = shutter;
     ctx.fillRect(b.x + 2, storefrontY + 2, b.w - 4, b.groundH - 3);
-    ctx.fillStyle = mix('#69758a', '#d7c7af', restored * 0.3);
-    for (let sy = storefrontY + 3; sy < storefrontY + b.groundH - 1; sy += 2) ctx.fillRect(b.x + 2, sy, b.w - 4, 1);
-    if (hash2(b.seed, 333) > 0.48) {
-      ctx.fillStyle = mix('#6e87a6', '#d8a06b', warmBias * 0.55);
-      ctx.fillRect(b.x + 3, storefrontY + 5, Math.max(4, b.w - 8), 1);
-    }
+    ctx.fillStyle = mix(shutter, '#10102a', 0.3);
+    for (let sy = storefrontY + 4; sy < storefrontY + b.groundH - 1; sy += 3) ctx.fillRect(b.x + 2, sy, b.w - 4, 1);
   } else {
     for (const wx of [leftWindowX, rightWindowX + windowW - 1]) {
-      ctx.fillStyle = mix('#0d111a', accent, 0.18);
+      ctx.fillStyle = frameC;
       ctx.fillRect(wx, storefrontY + 3, windowW + 1, b.groundH - 5);
-      ctx.fillStyle = darkGlass;
+      ctx.fillStyle = glass;
       ctx.fillRect(wx + 1, storefrontY + 4, windowW - 1, b.groundH - 7);
-      ctx.fillStyle = windowGlow;
+      ctx.fillStyle = glassTop;
       ctx.fillRect(wx + 1, storefrontY + 4, windowW - 1, 1);
-      ctx.fillStyle = coldLamp;
-      ctx.fillRect(wx + 2, storefrontY + 5, Math.max(2, windowW - 3), 1);
-      ctx.fillRect(wx + 2, storefrontY + 6, 1, Math.max(2, b.groundH - 10));
-      ctx.fillRect(wx + windowW - 1, storefrontY + 6, 1, Math.max(2, b.groundH - 10));
-      ctx.fillStyle = mix('#e8c07a', '#fff0c7', warmBias * 0.55);
-      ctx.fillRect(wx + 2, storefrontY + 7, Math.max(2, windowW - 4), 1);
-      ctx.fillStyle = windowColor;
-      ctx.fillRect(wx + 2, storefrontY + b.groundH - 6, windowW - 3, 1);
-      ctx.fillStyle = mix('#2a3645', '#8c7a62', restored * 0.28);
-      ctx.fillRect(wx + 2, storefrontY + b.groundH - 10, windowW - 2, 2);
-      ctx.fillRect(wx + 3, storefrontY + b.groundH - 13, Math.max(2, windowW - 5), 1);
+      ctx.fillStyle = shelf;
+      ctx.fillRect(wx + 1, storefrontY + b.groundH - 6, windowW - 1, 2);
+      ctx.fillRect(wx + 2, storefrontY + b.groundH - 9, Math.max(2, windowW - 3), 3);
     }
   }
 
-  ctx.fillStyle = mix('#121726', '#4e4338', restored * 0.25);
+  ctx.fillStyle = frameC;
   ctx.fillRect(doorX, storefrontY + 2, doorW, b.groundH - 2);
-  ctx.fillStyle = mix('#314c60', '#d7b68f', localWarm * 0.5 + restored * 0.22);
-  ctx.fillRect(doorX + 1, storefrontY + 4, doorW - 2, b.groundH - 8);
-  ctx.fillStyle = mix('#9cc0da', '#ffd79f', warmBias * 0.65);
-  ctx.fillRect(doorX + 1, storefrontY + 5, doorW - 2, 2);
-  ctx.fillStyle = mix('#cde2f0', '#fff0c7', warmBias * 0.55);
-  ctx.fillRect(doorX + 1, storefrontY + 7, doorW - 2, 1);
-  ctx.fillStyle = mix('#bacce0', '#ffdaa9', localWarm * 0.7 + restored * 0.28);
-  ctx.fillRect(doorX + 2, storefrontY + 8, 1, 1);
+  ctx.fillStyle = mix('#4a6a8a', '#d7b68f', localWarm * 0.5 + restored * 0.22);
+  ctx.fillRect(doorX + 1, storefrontY + 3, doorW - 2, b.groundH - 5);
+  ctx.fillStyle = mix('#a8c8e0', '#ffe2a8', warmBias * 0.6);
+  ctx.fillRect(doorX + 1, storefrontY + 3, doorW - 2, 2);
 
   drawAwning(ctx, b, y, localWarm, restored);
 
+  // sign board: a clear bright panel with one cream icon, one board colour per shop type
   const signY = storefrontY + 1;
-  ctx.fillStyle = mix('#11151f', accent, 0.7);
-  ctx.fillRect(b.x + 2, signY - 6, b.w - 4, 5);
-  ctx.fillStyle = mix('#f2f6fa', '#fff0d0', localWarm * 0.3 + restored * 0.18);
-  drawSignIcon(ctx, b.x + Math.max(2, Math.floor((b.w - 7) / 2)), signY - 3, b.shopType, ctx.fillStyle);
-  if (hash2(b.seed, 301) > 0.58) {
-    ctx.fillStyle = mix('#8eb4d2', '#f3bb85', warmBias * 0.68 + restored * 0.18);
-    ctx.fillRect(b.x + 3, signY - 5, Math.max(4, b.w - 6), 1);
-    ctx.fillStyle = mix('#c6d7e4', '#ffe9c6', warmBias * 0.55);
-    ctx.fillRect(b.x + 4, signY - 4, Math.max(3, b.w - 8), 1);
-  }
-  ctx.fillStyle = mix('#5e83a5', '#f0b46e', warmBias * 0.5);
-  ctx.fillRect(b.x + 2, storefrontY + b.groundH - 2, Math.max(4, b.w - 4), 1);
+  const board = mix(accent, '#ffffff', 0.12);
+  ctx.fillStyle = mix(board, '#100c28', 0.45);
+  ctx.fillRect(b.x + 2, signY - 8, b.w - 4, 8);
+  ctx.fillStyle = board;
+  ctx.fillRect(b.x + 3, signY - 7, b.w - 6, 6);
+  drawSignIcon(ctx, b.x + Math.max(3, Math.floor((b.w - 7) / 2)), signY - 6, b.shopType, mix('#f6f2e4', '#fff6dc', restored * 0.3));
 }
 
 function drawRoofDetail(ctx, b, y, restored) {
@@ -328,7 +287,7 @@ function drawNearBuilding(ctx, b, groundTop, wp, W) {
     ctx.fillRect(bx, y + 2 + ((bx + b.seed) % 2), 2, 1);
   }
 
-  drawUpperFloorWindows(ctx, b, y, localWarm, restored);
+  drawUpperFloorWindows(ctx, b, y, localWarm, restored, body);
   if (b.escape) {
     ctx.fillStyle = mix('#161b25', '#746756', restored * 0.26);
     for (let fy = y + 8; fy < b.baseY - b.groundH - 4; fy += 8) ctx.fillRect(b.x - 1, fy, 4, 1);
@@ -359,7 +318,7 @@ function drawFarTower(ctx, b, wp, fogT) {
   ctx.fillRect(b.x + b.w - 1, y, 1, b.h);
   ctx.fillStyle = mix('#151726', '#5e554b', wp.restoration * 0.22);
   ctx.fillRect(b.x - 1, y, b.w + 2, 1);
-  drawTowerWindows(ctx, b, y, fogT, localWarm, 0.04 + wp.night * 0.05 + wp.restoration * 0.08);
+  drawTowerWindows(ctx, b, y, fogT, localWarm, 0.04 + wp.night * 0.05 + wp.restoration * 0.08, mid);
   if (hash2(b.seed, 88) > 0.8) {
     ctx.fillStyle = mix('#1a1d2b', '#7e7265', wp.restoration * 0.18);
     ctx.fillRect(b.x + 2, y - 5, 1, 5);
@@ -577,30 +536,30 @@ function drawGroundStatic(ctx, W, H, groundTop, feetY, wp, buildings) {
   const curbY = groundTop + 11;
   const gutterY = curbY + 2;
   const roadTop = gutterY + 1;
-  ctx.fillStyle = mix('#475362', '#d1c6b2', R);
+  ctx.fillStyle = mix('#5a6482', '#d1c6b2', R);
   ctx.fillRect(0, groundTop, W, curbY - groundTop);
-  ctx.fillStyle = mix('#71889a', '#f1dec1', R);
+  ctx.fillStyle = mix('#8a98b8', '#f1dec1', R);
   ctx.fillRect(0, curbY - 1, W, 1);
-  ctx.fillStyle = mix('#95a9bb', '#fff0d0', R * 0.45);
+  ctx.fillStyle = mix('#a9b7d2', '#fff0d0', R * 0.45);
   ctx.fillRect(0, curbY - 2, W, 1);
-  ctx.fillStyle = mix('#263246', '#8f8677', R);
+  ctx.fillStyle = mix('#222a46', '#8f8677', R);
   ctx.fillRect(0, curbY, W, 2);
   ctx.fillStyle = mix('#323948', '#a39782', R);
   ctx.fillRect(0, gutterY, W, 1);
 
   for (let row = 0, y = groundTop + 5; y < curbY - 1; row++, y += 5) {
-    ctx.fillStyle = mix('#556777', '#d9cbb1', R * 0.72);
+    ctx.fillStyle = mix('#4e5a78', '#d9cbb1', R * 0.72);
     ctx.fillRect(0, y, W, 1);
     const start = row % 2 ? 9 : 0;
-    ctx.fillStyle = mix('#435463', '#c1b298', R * 0.55);
+    ctx.fillStyle = mix('#515d7c', '#c1b298', R * 0.55);
     for (let x = start; x < W; x += 18) ctx.fillRect(x, y - 4, 1, 4);
   }
 
-  ctx.fillStyle = mix('#2a3140', '#8f8779', R);
+  ctx.fillStyle = mix('#2a3052', '#8f8779', R);
   ctx.fillRect(0, roadTop, W, H - roadTop);
-  ctx.fillStyle = mix('#31394a', '#948a79', R * 0.55);
+  ctx.fillStyle = mix('#313860', '#948a79', R * 0.55);
   ctx.fillRect(0, roadTop + 2, W, 10);
-  ctx.fillStyle = mix('#364052', '#9d9280', R * 0.45);
+  ctx.fillStyle = mix('#353d62', '#9d9280', R * 0.45);
   ctx.fillRect(0, feetY - 24, W, 7);
   ctx.fillStyle = mix('#242c3a', '#786f63', R * 0.38);
   ctx.fillRect(0, feetY + 10, W, H - feetY - 10);
@@ -612,7 +571,7 @@ function drawGroundStatic(ctx, W, H, groundTop, feetY, wp, buildings) {
   const laneY = Math.round((roadTop + feetY) / 2);
   const dashW = sceneSpan(W, 0.12, 12);
   const gap = sceneSpan(W, 0.09, 9);
-  ctx.fillStyle = mix('#555f6f', '#c7b395', R * 0.18);
+  ctx.fillStyle = mix('#8c7e58', '#d9c490', R * 0.4);
   for (let x = sceneX(W, 0.08); x < W - dashW; x += dashW + gap) ctx.fillRect(x, laneY, dashW, 1);
 
   const sheenYs = [roadTop + 7, laneY + 5, feetY - 18];
@@ -631,12 +590,6 @@ function drawGroundStatic(ctx, W, H, groundTop, feetY, wp, buildings) {
 
   drawStreetFurniture(ctx, W, groundTop, R);
   drawPuddlesStatic(ctx, W, groundTop, H, wp);
-
-  ctx.fillStyle = 'rgba(12,16,24,0.75)';
-  ctx.fillRect(0, feetY + 6, sceneSpan(W, 0.28, 30), 12);
-  ctx.fillRect(sceneX(W, 0.02), feetY + 2, sceneSpan(W, 0.16, 16), 6);
-  ctx.fillStyle = 'rgba(180,72,60,0.45)';
-  ctx.fillRect(sceneX(W, 0.02), feetY + 10, 2, 1);
 
   if (R > 0.45) {
     ctx.globalAlpha = Math.min(1, (R - 0.45) / 0.4);
