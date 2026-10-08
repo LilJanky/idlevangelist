@@ -45,7 +45,7 @@ test('bus: a pack walks in together on one side, clusters near where it got in, 
   const game = setup();
   const got = game.startCrowdEvent('bus');
   assert.ok(got.count >= SHAPES.bus.size[0] && got.count <= SHAPES.bus.size[1] + game.mods.eventSize);
-  run(game, 8);
+  run(game, 4.5);
   assert.ok(game.crowd.openPeds().length >= got.count - 1, 'all open at the same moment');
   const xs = game.crowd.peds.map((p) => p.x);
   assert.ok(Math.max(...xs) - Math.min(...xs) < 0.45, 'a tight group');

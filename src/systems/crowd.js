@@ -207,7 +207,8 @@ export class CrowdSystem {
       if (p.goalX != null && !p.hold && !paused && (p.goalX - p.x) * p.dir <= p.speed * speedScale * dt) {
         p.x = p.goalX;
         p.hold = true;
-        p.holdLeft = p.holdFor >= 99 ? Math.max(1.5, p.oppLeft + 0.8) : p.holdFor;
+        // a gathering stands for a short beat, never for the whole moment: they drift on and the street keeps flowing
+        p.holdLeft = p.holdFor >= 99 ? Math.min(cfg.maxHold, Math.max(2, p.oppLeft * 0.5)) : p.holdFor;
       }
       if (p.hold && !paused) {
         p.holdLeft -= dt;
@@ -217,6 +218,10 @@ export class CrowdSystem {
           p.friend = false;
         }
       }
+      if (p.laneF === undefined) p.laneF = p.lane;
+      // glide between lanes instead of jumping
+      if (p.laneF !== p.lane) p.laneF += Math.sign(p.lane - p.laneF) * Math.min(Math.abs(p.lane - p.laneF), dt * 4);
+      if (!p.standing && !p.hold && !freeze && !p.far) this.sidestep(p);
       if (!p.standing && !p.hold && !freeze) {
         let v = p.speed;
         for (const q of this.peds) {
@@ -260,6 +265,20 @@ export class CrowdSystem {
         if (!s.engaged) this.missed += 1;
         this.specials[i] = this.specials[this.specials.length - 1];
         this.specials.pop();
+      }
+    }
+  }
+
+  /** A walker who would run into someone standing still ahead of them steps into a free lane and keeps going. */
+  sidestep(p) {
+    const gap = this.balance.crowd.queueGap;
+    const blocked = (lane) => this.peds.some((q) => q !== p && q.lane === lane && !q.far && (q.hold || q.standing) && (q.x - p.x) * p.dir > -0.02 && (q.x - p.x) * p.dir < gap);
+    if (!blocked(p.lane)) return;
+    const clear = (lane) => !blocked(lane) && !this.peds.some((q) => q !== p && q.lane === lane && !q.far && Math.abs(q.x - p.x) < gap * 0.7);
+    for (const lane of [p.lane - 1, p.lane + 1]) {
+      if (lane >= 0 && lane <= 2 && clear(lane)) {
+        p.lane = lane;
+        return;
       }
     }
   }

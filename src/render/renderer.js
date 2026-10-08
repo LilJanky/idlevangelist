@@ -789,7 +789,11 @@ export class Renderer {
   pedFeet(p) {
     // friends of the work walk the far side of the street, out of the way of the people you tap
     if (p.far) return this.groundTop + 17 + (p.id % 2) * 3;
-    return this.laneYs(this.groundTop)[p.lane] + (p.id % 3);
+    const ys = this.laneYs(this.groundTop);
+    const lf = p.laneF === undefined ? p.lane : p.laneF;
+    const lo = Math.floor(lf);
+    const hi = Math.min(2, lo + 1);
+    return Math.round(ys[lo] + (ys[hi] - ys[lo]) * (lf - lo)) + (p.id % 3);
   }
 
   /** CSS-pixel position just above a pedestrian's head (for "+Seeds" feedback that says where it came from). */
