@@ -7,6 +7,8 @@
 // Crowd (tier 1) is ~24 px tall; the people in focus (tier 2) are the same design drawn bigger (~34 px) so the pixels match.
 // Faces right; mirrored for left.
 
+const FLAT = true; // no outline, no rim light: plain flat colour shapes with a single shade
+
 export function buildChibi(char, tier, h) {
   const big = tier >= 2;
   const k = big ? 1.4 : 1; // everything is laid out for the small size and scaled
@@ -25,7 +27,7 @@ export function buildChibi(char, tier, h) {
   const cv = h.makeCanvas(W, H);
   const ctx = cv.getContext('2d', { willReadFrequently: true });
 
-  const skin = mat(char.skin, 0.22);
+  const skin = mat(char.skin, 0.14);
   const hairBase = char.age === 'old' ? '#c9ccd4' : char.hair;
   const hair = mat(hairBase, 0.36);
   const top = mat(char.top, 0.3);
@@ -55,7 +57,8 @@ export function buildChibi(char, tier, h) {
   };
   // flat ellipse: base colour, shade on the lower-right, a rim of highlight on the upper-left edge
   const blob = (cx, cy, rx, ry, m, opts = {}) => {
-    const { test, rim = true, shade = true } = opts;
+    const { test, rim: rim0 = true, shade = true } = opts;
+    const rim = rim0 && !FLAT;
     for (let y = Math.floor((cy - ry) * k); y <= Math.ceil((cy + ry) * k); y++) {
       for (let x = Math.floor((cx - rx) * k); x <= Math.ceil((cx + rx) * k); x++) {
         const nx = (x + 0.5 - cx * k) / (rx * k);
@@ -79,7 +82,7 @@ export function buildChibi(char, tier, h) {
       for (let x = Math.round(x0 * k) + inset; x < Math.round(x1 * k) - inset; x++) {
         const right = x >= Math.round(x1 * k) - inset - Math.max(1, Math.round(1.3 * k));
         const lit = y === Math.round(y0 * k) || x === Math.round(x0 * k) + inset;
-        ctx.fillStyle = right ? m.sh : lit ? m.hi : m.base;
+        ctx.fillStyle = right ? m.sh : lit && !FLAT ? m.hi : m.base;
         ctx.fillRect(OX + x, OY + y - bob, 1, 1);
       }
     }
@@ -199,10 +202,10 @@ export function buildChibi(char, tier, h) {
     const ey = headCY - 0.2;
     const eye = tint(h.mix('#2a1c24', char.skin, 0.1));
     const ew = big ? 0.6 : 1;
-    box(hx + 1.8, ey, ew, 1.8, eye);
-    box(hx + 3.8, ey, ew, 1.8, eye);
+    box(hx + 1.1, ey, ew, 1.8, eye);
+    box(hx + 3.0, ey, ew, 1.8, eye);
     if (char.tired) { box(hx + 1.6, ey - 0.8, 1.6, 0.6, skin.sh); box(hx + 3.6, ey - 0.8, 1.6, 0.6, skin.sh); }
-    box(hx + 0.8, ey + 2.2, 1.4, 0.9, tint(h.mix(char.skin, '#e8706a', 0.35)));
+    box(hx + 0.4, ey + 2.2, 1.4, 0.9, tint(h.mix(char.skin, '#e8706a', 0.35)));
     if (big) {
       const mouth = tint(h.mix(char.skin, '#8a3c3c', 0.55));
       if (char.smile) box(hx + 2.4, ey + 3.4, 2, 0.7, mouth);
@@ -228,7 +231,7 @@ export function buildChibi(char, tier, h) {
   const ay = shoulderY + 1.2;
   let handX = bx + 1.6 + swing * 0.6;
   let handY = ay + 5.2;
-  const arm = (x1, y1) => {
+  const arm = (x1, y1, bare = true) => {
     // a thick flat arm from the shoulder to the hand
     const n = 6;
     for (let i = 0; i <= n; i++) {
@@ -237,7 +240,7 @@ export function buildChibi(char, tier, h) {
       const y = ay + (y1 - ay) * t;
       blob(x, y, 1.5, 1.5, sleeveM, { rim: i === 0 });
     }
-    blob(x1, y1, 1.35, 1.3, skin, { rim: false });
+    blob(x1, y1, 1.35, 1.3, bare ? skin : { ...sleeveM, base: sleeveM.sh }, { rim: false });
   };
   if (pose === 'point') { handX = bx + 8; handY = ay - 4; arm(handX, handY); }
   else if (pose === 'talk') { handX = bx + 6.4; handY = ay + 2; arm(handX, handY); }
@@ -248,7 +251,7 @@ export function buildChibi(char, tier, h) {
     handX = bx + 3.8; handY = ay + 3.6;
   } else if (pose === 'hold' || char.handItem === 'book') { handX = bx + 3.6; handY = ay + 4.2; arm(handX, handY); }
   else if (char.handItem === 'phone' || char.handItem === 'coffee') { handX = bx + 3.8; handY = ay + 3.8; arm(handX, handY); }
-  else arm(handX, handY);
+  else arm(handX, handY, !(big === false && walk));
 
   // props: deliberately oversized so the silhouette says who this is
   const hi = handX;
@@ -288,6 +291,6 @@ export function buildChibi(char, tier, h) {
     c2.scale(-1, 1);
     c2.drawImage(cv, 0, 0);
   }
-  h.outline(out.getContext('2d', { willReadFrequently: true }), out);
+  if (!FLAT) h.outline(out.getContext('2d', { willReadFrequently: true }), out);
   return { cv: out, ox: OX + (char.dir < 0 ? 0 : 0), oy: OY };
 }
