@@ -9,6 +9,7 @@
     "test": "node --test tests/",
     "sim": "node tools/simulate.js",
     "smoke": "node tools/smoke.mjs",
+    "a11y": "node tools/a11y.mjs",
     "playthrough": "node tools/playthrough.mjs"
   },
   "devDependencies": {

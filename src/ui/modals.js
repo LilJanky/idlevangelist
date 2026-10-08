@@ -26,7 +26,7 @@ export function gospelModal({ onClose }) {
     h('h2', { text: GOSPEL.title }),
     ...GOSPEL.points.map((p) => h('p', { text: `• ${p}` })),
     h('div', { class: 'verse' }, '“For by grace you have been saved through faith. And this is not your own doing; it is the gift of God.”', h('span', { text: 'Ephesians 2:8 · ESV' })),
-    h('div', { class: 'btns' }, h('button', { class: 'btn', type: 'button', text: 'Close', on: { click: onClose } })),
+    h('div', { class: 'btns' }, h('button', { class: 'btn', type: 'button', text: 'Close', 'data-escape': '', on: { click: onClose } })),
   );
 }
 
@@ -48,7 +48,7 @@ export function offlineModal(gains, { onClose }) {
     gains.wordReady ? h('p', { class: 'waiting', text: 'The Word is ready to proclaim.' }) : null,
     gains.waiting ? h('p', { class: 'waiting', text: 'Someone is waiting on the street to talk with you.' }) : null,
     h('p', { class: 'note', text: 'Conversations and special opportunities wait for you in person. God is working whether or not anyone is watching.' }),
-    h('div', { class: 'btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Continue', on: { click: onClose } })),
+    h('div', { class: 'btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Continue', 'data-escape': '', on: { click: onClose } })),
   );
 }
 
@@ -110,7 +110,7 @@ export function generationCompleteModal(summary, { onBegin, reviewOnly = false, 
     ),
     h('p', { class: 'note', text: GEN_COMPLETE.faithfulnessNote }),
     reviewOnly
-      ? h('div', { class: 'btns' }, h('button', { class: 'btn', type: 'button', text: 'Close', on: { click: onClose } }))
+      ? h('div', { class: 'btns' }, h('button', { class: 'btn', type: 'button', text: 'Close', 'data-escape': '', on: { click: onClose } }))
       : h('div', { class: 'btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Begin Next Generation', on: { click: onBegin } })),
   );
 }
@@ -124,7 +124,7 @@ export function confirmModal({ title, text, confirmLabel = 'Confirm', onConfirm,
     h(
       'div',
       { class: 'btns' },
-      h('button', { class: 'btn ghost', type: 'button', text: 'Cancel', on: { click: onCancel } }),
+      h('button', { class: 'btn ghost', type: 'button', text: 'Cancel', 'data-escape': '', on: { click: onCancel } }),
       h('button', { class: 'btn rose', type: 'button', text: confirmLabel, on: { click: onConfirm } }),
     ),
   );
@@ -186,7 +186,7 @@ export function settingsModal(ctx) {
   }
   nodes.push(
     h('div', { class: 'version', text: `IdleVangelist · Generation I build · save v${BALANCE.saveVersion}`, on: { click: ctx.versionTap } }),
-    h('div', { class: 'btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Close', on: { click: ctx.close } })),
+    h('div', { class: 'btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Close', 'data-escape': '', on: { click: ctx.close } })),
   );
   return h('div', { class: 'modal', role: 'dialog', 'aria-label': 'Settings' }, ...nodes);
 }

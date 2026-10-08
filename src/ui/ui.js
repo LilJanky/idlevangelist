@@ -132,6 +132,12 @@ export class UI {
 
   bindKeys() {
     document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.modalOpen) {
+        // only dismiss dialogs that have a harmless way out (Settings, the Good News); the intro and results need a choice
+        const back = this.els.overlay.querySelector('[data-escape]');
+        if (back) back.click();
+        return;
+      }
       if (this.modalOpen || e.repeat || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
       const talking = !this.els.choiceBox.classList.contains('hidden');
       if (talking && /^[1-9]$/.test(e.key)) {
@@ -200,16 +206,37 @@ export class UI {
 
   // ---------------------------------------------------------------- modals
   openModal(node) {
+    if (!this.modalOpen) this.lastFocus = document.activeElement;
     clear(this.els.overlay);
+    if (!node.getAttribute('role')) node.setAttribute('role', 'dialog');
+    node.setAttribute('aria-modal', 'true');
+    const title = node.querySelector('h2');
+    if (title) {
+      title.id = 'modal-title';
+      node.setAttribute('aria-labelledby', 'modal-title');
+    }
     this.els.overlay.append(node);
     setHidden(this.els.overlay, false);
     this.modalOpen = true;
+    // keyboard users land on the first action, and Tab stays inside the dialog
+    (node.querySelector('.btn.gold, .btn, button') || node).focus?.({ preventScroll: true });
+    node.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const f = [...node.querySelectorAll('button:not(:disabled), input, a[href]')].filter((x) => x.offsetParent);
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
   }
 
   closeModal() {
     setHidden(this.els.overlay, true);
     clear(this.els.overlay);
     this.modalOpen = false;
+    if (this.lastFocus?.isConnected) this.lastFocus.focus?.({ preventScroll: true });
+    this.lastFocus = null;
   }
 
   showIntro() {
