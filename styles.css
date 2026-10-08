@@ -687,3 +687,66 @@ body:not(.reduce-motion) .modal.intro .btn.gold { animation: beginPulse 1.6s eas
 .modal .verse, .note.verse { font-style: italic; }
 .modal .verse, .verse { font-family: var(--serif); font-size: 14px; line-height: 1.4; font-style: italic; }
 .modal .verse span, .verse span { font-family: var(--mono); font-style: normal; }
+
+/* ================= Paper and leather =================
+   The lower half of the screen is a worn leather satchel with tract-paper cards pinned in it; the scene stays a lit window onto the city. */
+:root { --paper: #f0e2bf; --paper-2: #e7d5a9; --paper-edge: #b79a64; --paper-ink: #2c1c10; --paper-soft: #6e5636; --paper-gold: #8f5e10; --paper-green: #2c6a2c; --leather: #2b1e18; --leather-2: #382920; --stitch: #7d5f3e; }
+#panel { background: var(--leather); background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 4px); border-top: 3px solid #0e0806; box-shadow: inset 0 3px 0 #4a352a; }
+#nav { background: #1d1410; border-top: 3px solid #0e0806; }
+.nav-btn { background: var(--leather-2); border: 2px solid #0e0806; box-shadow: inset 0 0 0 1px var(--stitch); color: #c9b08a; }
+.nav-btn.active { background: var(--paper); color: var(--paper-ink); box-shadow: inset 0 0 0 2px var(--paper-edge), 0 -2px 0 #0e0806; }
+.nav-btn.active::before { top: -6px; width: 14px; height: 10px; margin-left: -7px; background: #b3262e; box-shadow: inset 0 -3px 0 #7c1820; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%); }
+.section-title, .tab > .section-title span { color: #cfb48a; }
+.buy-modes button { background: var(--leather-2); border: 2px solid #0e0806; color: #d8c29c; }
+.buy-modes button.on { background: var(--paper); color: var(--paper-ink); }
+
+/* paper cards */
+.row, .passive-summary, .choice, .note, #preview-card, .street-status, .ministry-strip > *, #boss-row {
+  background: var(--paper); color: var(--paper-ink); border: 2px solid #0e0806;
+  box-shadow: inset 0 0 0 1px var(--paper-edge), inset 0 3px 0 rgba(255,255,255,.35), 0 3px 0 #0e0806;
+}
+.row { border-left: 8px solid var(--stripe, var(--paper-edge)); }
+.row.up-row:not(.can) { opacity: 1; background: var(--paper-2); }
+.row.up-row.can { background: var(--paper); box-shadow: inset 0 0 0 2px var(--stripe), inset 0 3px 0 rgba(255,255,255,.35), 0 3px 0 #0e0806; }
+.row .name, .row .name small { color: var(--paper-ink); }
+.row .name small { color: var(--paper-gold); }
+.row .desc, .row .perf, .note, .passive-summary .ps-label, .ps-legend { color: var(--paper-soft); }
+.row .effect, .row .nextprod, .row .tickflash, .row .eta { color: var(--paper-green); }
+.row .prod b, .passive-summary .ps-total b { color: var(--paper-gold); }
+.row .prod small, .passive-summary .ps-total small { color: var(--paper-soft); }
+.row.up-row .chip { background: color-mix(in srgb, var(--stripe) 85%, #000); color: #fff6dc; }
+.row.up-row .chip.best { background: #b3262e; color: #fff6dc; }
+.ps-bar { background: #3a2a1c; border-color: #0e0806; }
+.choice { color: var(--paper-ink); }
+.choice:active { background: var(--paper-2); }
+.note { border-left-color: var(--paper-gold); }
+
+.row .buy, .row .buy small { color: #f4ffe8; }
+.row .buy:disabled, .row .buy:disabled small { color: #9d9484; }
+.row .buy.armed, .row .buy.armed small { color: #231a06; }
+.street-status, .street-status * { color: var(--paper-ink); }
+.street-status .goal-label { color: var(--paper-gold); }
+.street-status .goal-track { background: #3a2a1c; border-color: #0e0806; }
+.street-status .sh-streak b { color: var(--paper-gold); }
+.street-status .goal-text { font-family: var(--serif); font-size: .88rem; }
+#encounter-card { background: var(--paper); border: 2px solid #0e0806; box-shadow: inset 0 0 0 2px var(--paper-edge), 0 4px 0 rgba(0,0,0,.5); }
+#encounter-card.special { box-shadow: inset 0 0 0 2px #c79a2e, 0 4px 0 rgba(0,0,0,.5); }
+#encounter-card.boss { box-shadow: inset 0 0 0 2px #b3262e, 0 4px 0 rgba(0,0,0,.5); }
+#encounter-card p, #enc-statement { color: var(--paper-ink); }
+#enc-name { color: var(--paper-ink); }
+.enc-head, #enc-label, .meter-label, .meter-num { color: var(--paper-soft); }
+#encounter-card .meter-track { background: #3a2a1c; border-color: #0e0806; }
+#hud { background: linear-gradient(#2f2119, #241812); border-bottom: 3px solid #0e0806; box-shadow: inset 0 -2px 0 #4a352a; }
+.stat, .icon-btn { background: #1d1410; border: 2px solid #0e0806; box-shadow: inset 0 0 0 1px var(--stitch); }
+
+@keyframes rowPulse { 0% { background: #f8e6a2; } 100% { background: var(--paper); } }
+.row.min-row { border-left-color: color-mix(in srgb, var(--c) 72%, #000); }
+.ps-legend span::before { outline: 1px solid #0e0806; }
+.ps-bar i { border-right: 1px solid #0e0806; }
+.modal { background: var(--leather-2); border: 2px solid #0e0806; box-shadow: inset 0 0 0 2px var(--stitch), 0 6px 0 rgba(0,0,0,.5); }
+.modal.intro { background: var(--paper); color: var(--paper-ink); box-shadow: inset 0 0 0 2px var(--paper-edge), 0 6px 0 rgba(0,0,0,.5); }
+.modal.intro p { color: var(--paper-ink); }
+.modal.intro h2 { color: #8f5e10; text-shadow: 0 2px 0 rgba(255,255,255,.5); }
+.modal.intro .verse { background: #e4d09c; border-left-color: #b3262e; color: var(--paper-ink); }
+.modal.intro .verse span { color: var(--paper-soft); }
+.modal.intro .emblem { filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
