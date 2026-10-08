@@ -124,7 +124,8 @@ export class Renderer {
     this.W = ART_W;
     this.H = 130;
     this.reducedMotion = false;
-    this.kick = { proclaim: -10, react: -10, shake: -10, crit: -10, word: -10 };
+    this.kick = { proclaim: -10, react: -10, shake: -10, crit: -10, word: -10, bossHit: -10 };
+    this.lastCheer = 0;
     this.sparks = [];
     this.seedFlow = [];
     this.screenFlash = { t: -10, a: 0, color: '#fff' };
@@ -203,6 +204,23 @@ export class Renderer {
   impactAtCss(level, x, y, color) {
     if (!this.scale) return;
     this.impact(level, x / this.scale, y / this.scale, color);
+  }
+
+  /** The Professor takes a point: he rocks back, light and sparks fly from where he stands, scaled by how well the passage fit. */
+  bossHit(level, color = '#ffe9a8') {
+    this.kick.bossHit = this.now;
+    this.kick.react = this.now;
+    this.impact(level, this.focusX, this.feetY - 28, color);
+  }
+
+  /** Victory: the plaza erupts. Gold and green sparks rise from all over the street for a few seconds. */
+  celebrate(t) {
+    if (this.reducedMotion || t - this.lastCheer < 0.16) return;
+    this.lastCheer = t;
+    const x = this.W * (0.08 + Math.random() * 0.84);
+    const y = this.groundTop + 10 + Math.random() * (this.feetY - this.groundTop - 18);
+    const colors = ['#ffe9a8', '#fff4c8', '#9ada6a', '#f2c860'];
+    this.burst(x, y, { n: 9, color: colors[Math.floor(Math.random() * colors.length)], speed: 34, life: 0.8, gravity: 38, size: 2 });
   }
 
   impactCenter(level, color) {
@@ -456,6 +474,7 @@ export class Renderer {
     this.drawGround(ctx, groundTop, wp, t);
     this.drawLamps(ctx, groundTop, wp, t);
     this.drawPeopleAndProps(ctx, groundTop, wp, t);
+    if (game.boss?.stage === 'victory') this.celebrate(t);
     this.updateSparks(t);
     this.drawSparks(ctx);
     this.drawSeedFlow(ctx, t);
@@ -1440,7 +1459,10 @@ export class Renderer {
     }
     this.focusX = x;
     ctx.globalAlpha = alpha;
-    const hit = t - this.kick.react < 0.14 && enc.state === 'active';
+    const isBoss = enc.kind === 'boss';
+    const bossHurt = isBoss && t - this.kick.bossHit < 0.5;
+    const hit = (t - this.kick.react < 0.14 && enc.state === 'active') || (bossHurt && !this.reducedMotion);
+    const recoil = bossHurt && !this.reducedMotion ? Math.round(Math.sin((t - this.kick.bossHit) * 40) * 2 * (1 - (t - this.kick.bossHit) / 0.5)) : 0;
     const walking = enc.state === 'focusEnter' || enc.state === 'focusExit';
     // spotlight: focused people are clearer, larger, and framed
     ctx.fillStyle = 'rgba(255,240,200,0.12)';
@@ -1451,13 +1473,17 @@ export class Renderer {
     const frame = walking
       ? this.walkFrame(t, 0.5 / (enc.state === 'focusEnter' ? cfg.focusEnter : cfg.focusExit), 1.8)
       : this.idleFrame(t, enc.variantIndex || 0.23, 1.15);
-    const pose = this.focusPose(enc, walking);
-    this.drawStreetReflection(ctx, x + (hit ? 1 : 0), feet, 2, {
-      look: this.focusLook(enc), dir: -1, pose, frame, eyes: true, bob: walking ? frame & 1 : frame, time: t,
+    // in the argument it is the Professor himself at the lectern, not a stand-in
+    const pose = isBoss ? (bossHurt ? 'react' : 'talk') : this.focusPose(enc, walking);
+    const look = isBoss ? PROFESSOR : this.focusLook(enc);
+    const extra = isBoss ? { glasses: true, scarf: '#7a3a3a' } : {};
+    const px = x + (hit ? 1 : 0) + recoil;
+    this.drawStreetReflection(ctx, px, feet, 2, {
+      look, dir: -1, pose, frame, eyes: true, bob: walking ? frame & 1 : frame, time: t, ...extra,
     }, wp, 1);
-    drawPerson(ctx, x + (hit ? 1 : 0), feet, 2, {
-      look: this.focusLook(enc), dir: -1, pose, frame,
-      eyes: true, bob: walking ? frame & 1 : frame, time: t,
+    drawPerson(ctx, px, feet, 2, {
+      look, dir: -1, pose, frame,
+      eyes: true, bob: walking ? frame & 1 : frame, time: t, ...extra,
     });
     ctx.globalAlpha = 1;
     if (enc.state === 'active' || enc.state === 'outcome' || enc.state === 'conversion') {

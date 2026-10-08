@@ -52,7 +52,7 @@
               <p id="enc-statement"></p>
               <div class="meter" id="enc-resist-wrap" aria-label="Resistance">
                 <span class="meter-label">Resistance</span>
-                <div class="meter-track"><div class="meter-fill" id="enc-resist"></div></div>
+                <div class="meter-track"><div class="meter-ghost" id="enc-resist-ghost"></div><div class="meter-fill" id="enc-resist"></div></div>
                 <span class="meter-num" id="enc-resist-num"></span>
               </div>
               <div class="meter timer hidden" id="enc-timer-wrap" aria-label="Time remaining in this exchange">
@@ -67,6 +67,7 @@
         <div id="verse-pop" class="hidden" role="status" aria-live="polite"><div class="vp-text"></div><div class="vp-ref"></div></div>
         <div id="toasts" aria-live="polite"></div>
         <div id="moment" class="hidden" role="dialog" aria-live="polite"></div>
+        <div id="boss-banner" class="hidden" aria-hidden="true"><div class="bb-kicker"></div><div class="bb-title"></div></div>
         <div id="tap-hint" class="hidden">Tap people with a bubble</div>
         <div id="boss-row" class="hidden"></div>
       </main>

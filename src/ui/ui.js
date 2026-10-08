@@ -65,7 +65,7 @@ export class UI {
     this.els = {
       scene: $('scene'), card: $('encounter-card'), name: $('enc-name'), label: $('enc-label'), statement: $('enc-statement'),
       portrait: $('enc-portrait'), portraitFrame: $('enc-portrait-frame'),
-      resist: $('enc-resist'), resistNum: $('enc-resist-num'), timerWrap: $('enc-timer-wrap'), timer: $('enc-timer'),
+      resist: $('enc-resist'), resistGhost: $('enc-resist-ghost'), bossBanner: $('boss-banner'), resistNum: $('enc-resist-num'), timerWrap: $('enc-timer-wrap'), timer: $('enc-timer'),
       seedIcon: $('seed-icon'),
       hud: $('street-hud'), shStreak: $('sh-streak'), shMult: $('sh-mult'), shCount: $('sh-count'), shFuse: $('sh-fuse'), shPips: $('sh-pips'), shMomentum: $('sh-momentum'), shMomLabel: $('sh-mom-label'), shFill: $('sh-fill'), resistWrap: $('enc-resist-wrap'),
       wordSlam: $('word-slam'), versePop: $('verse-pop'), floaters: $('floaters'), toasts: $('toasts'), moment: $('moment'), tapHint: $('tap-hint'),
@@ -102,6 +102,8 @@ export class UI {
     btnWord.addEventListener('click', () => this.onWord());
     btnAnswer.addEventListener('click', () => this.doAnswer());
     document.addEventListener('pointerdown', (e) => {
+      // in the Professor's exchange the passages stay up (they are the main controls); elsewhere a tap outside dismisses them
+      if (this.wasPressing) return;
       if (!tray.classList.contains('hidden') && !tray.contains(e.target) && !btnWord.contains(e.target)) this.closeTray();
     });
   }
@@ -386,10 +388,10 @@ export class UI {
         this.castVerse(unlocked[0]);
         return;
       }
-      const open = this.els.tray.classList.contains('hidden');
-      setHidden(this.els.tray, !open);
+      // the passages are the main controls here: WORD always brings them up (it never hides them)
+      setHidden(this.els.tray, false);
       this.sigs.tray = null;
-      if (open) this.positionTray();
+      this.positionTray();
       this.refreshTray();
       return;
     }
@@ -412,7 +414,6 @@ export class UI {
       this.cdTotal[id] = this.game.cool.words[id];
       this.renderer.onProclaim(false);
       this.audio.sfx('word');
-      this.closeTray();
     }
   }
 
@@ -539,6 +540,38 @@ export class UI {
     }, 2000 + d.tier * 350);
   }
 
+  /** A title card over the street for the big beats of the Professor's exchange. */
+  showBossBanner(kicker, title, cls = '', ms = 2200) {
+    const el = this.els.bossBanner;
+    if (!el) return;
+    el.className = cls;
+    setText(el.querySelector('.bb-kicker'), kicker);
+    setText(el.querySelector('.bb-title'), title);
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+    setHidden(el, false);
+    clearTimeout(this.bannerTimer);
+    this.bannerTimer = setTimeout(() => setHidden(el, true), ms);
+  }
+
+  /** A passage or point lands on the Professor: the number scales with how much of his argument it carried, and the whole scene answers. */
+  bossHitFeedback(d) {
+    const enc = this.game.boss?.enc;
+    if (!enc) return;
+    const frac = d.amount / Math.max(1, enc.resistanceMax);
+    const size = d.crit || frac >= 0.04 ? 28 : frac >= 0.02 ? 21 : 14;
+    const pos = this.floaterPos(d.source);
+    const label = d.grade === 'direct' ? 'DIRECT' : d.grade === 'contextual' ? 'FITTING' : '';
+    this.floater(`−${formatNumber(d.amount)}${d.crit ? '!' : ''}`, `bosshit ${d.crit ? 'crit' : ''} g-${d.grade || 'x'}`, pos.x, pos.y, `${size}px`);
+    if (label) this.floater(label, 'bosshit-tag', pos.x, pos.y - 30);
+    const level = d.crit ? 4 : d.grade === 'direct' ? 3 : d.grade === 'contextual' ? 2 : 1;
+    this.renderer.bossHit(level, d.grade === 'direct' ? '#fff4c8' : '#ffd98a');
+    this.pulse(this.els.resistWrap, 'hit');
+    this.pulse(this.els.portraitFrame, 'flinch');
+    this.audio.sfx(level >= 3 ? 'unlock' : 'word');
+  }
+
   floater(text, cls, x, y, size = '') {
     const pool = this.els.floaters.children;
     const el = pool[this.floaterIndex++ % pool.length];
@@ -586,6 +619,14 @@ export class UI {
       switch (type) {
         case 'impact': {
           // The Professor's exchange: argument weight answered.
+          if (this.game.boss?.enc && (d.source === 'word' || d.source === 'answer')) {
+            this.bossHitFeedback(d);
+            if (d.crit && !this.critSeen) {
+              this.critSeen = true;
+              this.toast('Critical Proclamation!', 'gold', 2000);
+            }
+            break;
+          }
           const pos = this.floaterPos(d.source);
           this.floater(d.crit ? `${formatNumber(d.amount)}!` : formatNumber(d.amount), `${d.crit ? 'crit' : ''} ${d.source === 'word' || d.source === 'answer' ? 'word' : ''}`, pos.x, pos.y);
           if (d.crit && !this.critSeen) {
@@ -679,6 +720,9 @@ export class UI {
           break;
         }
         case 'bossPhase':
+          this.showBossBanner(`ARGUMENT ${['I', 'II', 'III'][d.index] || d.index + 1}`, BOSS.phases[d.index].title.toUpperCase(), 'argument', 2000);
+          this.renderer.impactCenter(2, '#ffd98a');
+          this.verseTried = {};
           if (d.index === 0 && d.bonus > 0) this.toast(`The word got around: a crowd came for the lecture (\u2212${Math.round(d.bonus * 100)}% on the first argument).`, 'gold', 5200);
           break;
         case 'convertTick': {
@@ -754,7 +798,10 @@ export class UI {
           this.pulse(this.els.sps, 'pulse');
           break;
         case 'bossWindow':
-          this.audio.sfx('special');
+          this.audio.sfx('bossWin');
+          this.showBossBanner('ARGUMENT ANSWERED', 'THE CROWD IS LISTENING', 'answered', 2400);
+          this.renderer.impactCenter(3, '#fff4c8');
+          this.closeTray();
           break;
         case 'bossWindowEnd':
           this.toast(BOSS.window.end(d.attention, d.bonus), '', 4200);
@@ -763,12 +810,10 @@ export class UI {
           this.toast(BOSS.concession, '', 3200);
           break;
         case 'word': {
-          // The Professor's exchange: a passage applied to the argument.
-          if (d.grade === 'direct' || d.grade === 'contextual') {
-            const p = this.renderer.focusAnchor();
-            this.floater(`${d.label} \u00b7 ${SCRIPTURES[d.id].ref}`, 'timely', p.x, p.y - 26);
-          }
-          this.showVerse(d.id);
+          // The Professor's exchange: a passage applied to the argument. Its fit is remembered on its button, so trying passages teaches.
+          (this.verseTried ||= {})[d.id] = d.grade;
+          this.sigs.tray = null;
+          this.showVerse(d.id, 2400);
           break;
         }
         case 'answer':
@@ -859,12 +904,17 @@ export class UI {
           break;
         case 'bossStart':
           this.audio.sfx('boss');
+          this.verseTried = {};
           this.closeTray();
           this.clearToasts();
           break;
         case 'bossVictory':
+          this.bossReward = d.seeds;
+          this.closeTray();
+          this.showBossBanner('FAITHFULLY ANSWERED', 'THE EXCHANGE IS COMPLETE', 'victory', 3200);
           this.renderer.impactCenter(4, '#fff4c8');
           this.audio.sfx('bossWin');
+          setTimeout(() => { this.renderer.impactCenter(4, '#ffe9a8'); this.audio.sfx('reward'); }, 700);
           break;
         case 'bossPassed':
           this.audio.sfx('passed');
@@ -1002,6 +1052,7 @@ export class UI {
     if (isBoss) {
       const pct = Math.max(0, Math.min(100, (enc.resistance / enc.resistanceMax) * 100));
       els.resist.style.width = `${pct}%`;
+      if (els.resistGhost) els.resistGhost.style.width = `${pct}%`;
       setText(els.resistNum, enc.resolved ? '0' : formatNumber(Math.ceil(enc.resistance)));
       setHidden(els.timerWrap, false);
       els.timer.style.width = `${Math.max(0, (enc.timeLeft / enc.timeLimit) * 100)}%`;
@@ -1050,7 +1101,7 @@ export class UI {
     if (boss) {
       if (boss.stage === 'intro') return { key: 'boss-intro', cls: 'boss-dialog' };
       if (boss.stage === 'transition') return { key: `boss-trans-${boss.phaseIndex}`, cls: 'boss-dialog' };
-      if (boss.stage === 'victory') return { key: 'boss-victory', cls: 'boss-dialog' };
+      if (boss.stage === 'victory') return boss.t < 3.3 ? null : { key: 'boss-victory', cls: 'boss-dialog' };
       if (boss.stage === 'passed') return { key: 'boss-passed', cls: 'boss-dialog' };
       return null;
     }
@@ -1088,6 +1139,7 @@ export class UI {
       el.append(
         h('h3', { text: 'The exchange is complete' }),
         ...BOSS.victory.map((l) => h('p', { text: l })),
+        this.bossReward ? h('div', { class: 'reward', text: `+${formatNumber(this.bossReward)} Seeds` }) : null,
         h('div', { class: 'quote', text: BOSS.verseVictory.text }),
         h('span', { class: 'ref', text: BOSS.verseVictory.ref }),
         h('div', { class: 'row-btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Continue', on: { click: () => game.finishBossVictory() } })),
@@ -1156,9 +1208,18 @@ export class UI {
     const gameplay = this.state.phase === 'gen1';
     const pressing = enc?.kind === 'boss' && enc.state === 'active' && enc.step === 'press' && !enc.resolved;
     const word = els.btnWord;
+    els.scene.classList.toggle('boss-fight', !!game.boss);
+    document.getElementById('app').classList.toggle('boss-press', pressing);
     els.streetTop.classList.toggle('has-answer', pressing);
     els.actionRow.classList.toggle('has-answer', pressing);
     setHidden(els.btnAnswer, !pressing);
+    // the passages appear by themselves when it is time to bring one, so nobody has to guess that WORD opens them
+    if (pressing && !this.wasPressing && unlocked.length > 1 && this.tab === 'street') {
+      setHidden(els.tray, false);
+      this.sigs.tray = null;
+      this.positionTray();
+    }
+    this.wasPressing = pressing;
     if (pressing) {
       word.classList.remove('ready', 'charging');
       word.disabled = !gameplay || unlocked.length === 0;
@@ -1209,7 +1270,10 @@ export class UI {
       }
       els.wordCd.style.width = unlocked.length ? `${Math.min(100, frac * 100)}%` : '0';
     }
-    if (!els.tray.classList.contains('hidden')) this.refreshTray();
+    if (!els.tray.classList.contains('hidden')) {
+      this.positionTray();
+      this.refreshTray();
+    }
   }
 
   /**
@@ -1276,7 +1340,9 @@ export class UI {
     const unlocked = this.state.gen.scripturesUnlocked;
     const enc = game.activeEncounter;
     const pressing = enc?.kind === 'boss' && enc.state === 'active' && enc.step === 'press' && !enc.resolved;
-    const sig = unlocked.join(',');
+    if (!pressing && !els.tray.classList.contains('hidden')) this.closeTray();
+    const tried = this.verseTried || {};
+    const sig = `${unlocked.join(',')}|${Object.entries(tried).join(',')}`;
     if (this.sigs.tray !== sig) {
       this.sigs.tray = sig;
       clear(els.tray);
@@ -1285,8 +1351,10 @@ export class UI {
         if (!unlocked.includes(id)) continue;
         const v = SCRIPTURES[id];
         const cd = h('i', { class: 'cd' });
-        const btn = h('button', { class: 'verse-btn', type: 'button', title: v.useful, 'aria-label': `${v.ref}: ${v.name}. ${v.useful}`, on: { click: () => this.castVerse(id) } },
-          h('span', { class: 'v-ref', text: v.ref }), h('span', { class: 'v-name', text: v.name }), h('span', { class: 'v-short', text: v.short }), cd);
+        const grade = tried[id];
+        const fitText = grade === 'direct' ? 'Direct' : grade === 'contextual' ? 'Fits' : grade ? 'Tried' : '';
+        const btn = h('button', { class: `verse-btn${grade === 'direct' || grade === 'contextual' ? ' fits' : ''}`, type: 'button', title: v.useful, 'aria-label': `${v.ref}: ${v.name}. ${v.useful}${fitText ? ` Last time: ${fitText}.` : ''}`, on: { click: () => this.castVerse(id) } },
+          h('span', { class: 'v-ref', text: v.ref }), h('span', { class: 'v-short', text: v.short }), fitText ? h('span', { class: 'v-fit', text: fitText }) : null, cd);
         this.trayButtons[id] = { btn, cd };
         els.tray.append(btn);
       }
