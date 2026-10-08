@@ -1,6 +1,16 @@
 // Tiny DOM helpers. All dynamic text goes through textContent, never innerHTML.
 import { iconCanvas } from '../render/sprites.js';
 
+// Element.append(null) writes the text "null" into the page. Conditional children (`cond ? node : null`) are used everywhere,
+// so appending nothing is made a no-op for the whole UI.
+if (typeof Element !== 'undefined' && !Element.prototype.__nullSafeAppend) {
+  const nativeAppend = Element.prototype.append;
+  Element.prototype.append = function append(...nodes) {
+    return nativeAppend.apply(this, nodes.filter((n) => n !== null && n !== undefined && n !== false));
+  };
+  Element.prototype.__nullSafeAppend = true;
+}
+
 export function h(tag, props = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(props || {})) {

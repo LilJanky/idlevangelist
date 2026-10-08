@@ -716,7 +716,9 @@ export class UI {
     if (key.startsWith('boss-intro')) game.boss.t = Math.max(game.boss.t, BALANCE.boss.introSeconds);
     else if (key.startsWith('boss-trans')) game.boss.t = Math.max(game.boss.t, BALANCE.boss.transitionSeconds);
     else if (key.startsWith('conv') || key.startsWith('special')) game.skipPresentation();
-    else if (key.startsWith('boss-passed')) game.endBossSession();
+    else if (key.startsWith('boss-passed')) {
+      if (game.boss?.t > 0.8) game.endBossSession();
+    }
     else if (key.startsWith('info')) this.infoMoment = null;
   }
 
@@ -1267,6 +1269,7 @@ export class UI {
         debrief ? h('div', { class: 'quote', text: `Preparation: ${debrief.label}. You reached argument ${debrief.phase} of 3.` }) : null,
         ...(debrief ? debrief.tips.map((k) => h('div', { class: 'small', text: `• ${BOSS.debrief[k]}` })) : []),
         this.state.gen.bossState.attempts >= 2 ? h('div', { class: 'quote', text: BOSS.debrief.twice }) : null,
+        h('div', { class: 'small', text: 'Tap to continue' }),
       );
     } else if (want.key.startsWith('conv')) {
       const name = enc.convert?.name || 'Someone';

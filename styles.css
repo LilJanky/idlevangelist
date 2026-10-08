@@ -928,4 +928,5 @@ body.reduce-motion .modal.gen-complete .pending { opacity: 1; transform: none; }
 #montage .psalm span { font-family: var(--mono); font-style: normal; }
 @media (max-width: 359px) { #montage .title { font-size: 28px; } }
 body.reduce-motion #montage .title { animation: none; }
+#tap-hint { bottom: auto; top: 10px; }
 

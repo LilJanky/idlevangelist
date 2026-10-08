@@ -1275,7 +1275,8 @@ export class Game {
       case 'victory':
         break;
       case 'passed':
-        if (boss.t >= 3.2) this.endBossSession();
+        // the debrief stays up until tapped (it is the only coaching the player gets), with a safety timeout
+        if (boss.t >= 25) this.endBossSession();
         break;
       default:
         break;

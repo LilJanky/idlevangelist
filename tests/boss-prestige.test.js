@@ -126,7 +126,7 @@ test('boss failure: the opportunity passes with no loss of Seeds, Funds, upgrade
   assert.equal(JSON.stringify(gen.disciples), snapshot.disc);
   assert.equal(gen.bossState.status, 'cooldown');
   assert.equal(game.state.phase, 'gen1');
-  game.advance(4);
+  game.endBossSession(); // the debrief waits for a tap
   assert.equal(game.boss, null, 'session ends cleanly');
   // short cooldown, then retryable
   assert.ok(BALANCE.boss.cooldownSeconds <= 60);
