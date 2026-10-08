@@ -173,6 +173,7 @@ export class UI {
     this.audio.setSettings({ music: s.music, sfx: s.sfx, musicVolume: s.musicVolume, sfxVolume: s.sfxVolume, muted: s.muted });
     const reduce = s.reducedMotion === 'on' || (s.reducedMotion === 'auto' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
     document.body.classList.toggle('reduce-motion', !!reduce);
+    document.documentElement.classList.toggle('text-large', s.textSize === 'large');
     this.renderer.reducedMotion = !!reduce;
     this.hooks.saveSoon();
   }
@@ -1871,7 +1872,8 @@ export class UI {
     }
     return h('div', { class: `row up-row tag-${def.tag}${afford ? ' can' : ''}${fork ? ' in-fork' : ''}` },
       h('div', { class: 'info' },
-        h('div', { class: 'name' }, text.name, ' ',
+        h('div', { class: 'name' }, text.name),
+        h('div', { class: 'chips' },
           h('span', { class: `chip ${funds ? 'funds' : ''}`, text: UPGRADE_TAG_LABEL[def.tag] }),
           best ? h('span', { class: 'chip best', text: 'Best value' }) : null),
         h('div', { class: 'desc', text: text.desc }),

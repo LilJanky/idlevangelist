@@ -952,3 +952,97 @@ body.reduce-motion #boss-panel .bp-pips i.now { animation: none; }
 #app.boss-press #word-tray { margin-top: 0; }
 @media (max-height: 640px) { #boss-panel .bp-line { font-size: .8rem; } #app.boss-press #boss-panel .bp-line { display: none; } }
 @media (max-height: 640px) { #app.boss-press #boss-panel { display: none; } #app.boss-press #word-tray { margin-bottom: 4px; } #app.boss-press .verse-btn { min-height: 44px; } #app.boss-fight.boss-press #btn-answer { min-height: 48px; } }
+/* ================= Typography pass: a readable floor, one scale, and a Large text setting =================
+   Scale (rem, 16px root): 0.7 labels and captions (11px), 0.78 secondary, 0.86 body-in-controls, 0.95 reading text, 1.05 card names.
+   `html.text-large` raises the root to 18px, so everything below grows together. Nothing readable is under 11px. */
+html { font-size: 100%; }
+html.text-large { font-size: 116%; }
+.meter-label, .meter-num, .sh-label, .stat-label, .goal-label, .chip, .enc-head, #enc-name, #enc-label, .ps-label, .section-title, .version, .row .eta { font-size: .7rem; }
+.stat-rate, .stat-chip .stat-rate, .ministry-strip .sc i, .sh-streak small, .ps-legend, .a-sub, #answer-sub, .verse .ref, .ref, .small, .v-ref, .v-short, .nav-btn { font-size: .72rem; }
+.row.up-row .chip { font-size: .68rem; padding: 3px 7px; }
+.nav-btn { font-size: .72rem; }
+.ministry-strip .sc b, .row .buy, .buy-modes button, .setting .toggle, .cb-head, #tap-hint { font-size: .8rem; }
+.row .buy small { font-size: .72rem; }
+.assign button, .btn.small { font-size: .75rem; }
+.btn, .setting, .cb-feedback, .icon-btn { font-size: .85rem; }
+.row .name { font-size: 1.05rem; }
+.row .desc, .row .effect, .row .perf, .row .nextprod { font-size: .84rem; line-height: 1.35; }
+.row .perf, .row .nextprod { font-size: .78rem; }
+.note, .modal p { font-size: .88rem; line-height: 1.45; }
+.choice { font-size: .95rem; line-height: 1.3; }
+#encounter-card p, #enc-statement { font-size: .92rem; line-height: 1.3; }
+#verse-pop .vp-text { font-size: .85rem; }
+.toast { font-size: .85rem; }
+#moment p { font-size: .95rem; }
+#boss-panel .bp-head { font-size: .72rem; }
+.bb-kicker, #boss-banner .bb-kicker { font-size: .72rem; }
+.debug-box h3, .debug-box .btn.small { font-size: .75rem; }
+
+/* spacing: a steady 8px rhythm between cards, comfortable padding inside them, and room around controls */
+#tab-ministry, #tab-upgrades, #tab-legacy { gap: 10px; }
+.row { padding: 11px 12px; gap: 10px; }
+.row .info { display: flex; flex-direction: column; gap: 3px; }
+.row.up-row .name { display: block; line-height: 1.35; }
+.row.up-row .name .chip { margin-left: 6px; vertical-align: 2px; }
+.row .buy { min-width: 96px; min-height: 52px; align-self: center; }
+.section-title { margin: 8px 2px 2px; }
+.buy-modes { gap: 6px; }
+.passive-summary { padding: 12px 14px; }
+.ps-legend { gap: 4px 12px; margin-top: 8px; }
+.ps-bar { margin-top: 8px; }
+#street-status { padding: 10px 12px; }
+.ministry-strip { gap: 6px; }
+.ministry-strip button { padding: 4px 6px; }
+#choice-box { gap: 8px; }
+.choice { padding: 10px 12px; }
+.cb-head { margin: 2px 2px 0; }
+.modal { padding: 18px 16px; gap: 12px; }
+.modal h3 { margin: 6px 0 0; }
+.setting { min-height: 52px; gap: 12px; }
+.btns { gap: 10px; }
+.stat-grid { gap: 6px 12px; font-size: .85rem; }
+#hud { gap: 8px; }
+.stat { padding: 5px 10px; }
+@media (max-width: 359px) {
+  .row .name { font-size: 1rem; }
+  .row .buy { min-width: 84px; }
+  .choice { font-size: .9rem; }
+  .row { padding: 9px 10px; }
+}
+.stat-chip .stat-label, .fork-title, .passive-summary .ps-label, .modal .verse span, #boss-row .b-prep { font-size: .7rem; }
+.row .prod small, .passive-summary .ps-total small, #moment .quote, #moment .ref, .modal .verse span, .verse span { font-size: .72rem; }
+#moment .quote { font-size: .85rem; }
+#app.boss-press .verse-btn .v-short { font-size: .68rem; }
+#app.boss-press .verse-btn .v-ref { font-size: .74rem; }
+#moment .small, #moment .small * { font-size: .78rem; line-height: 1.4; }
+.row.up-row .chip { font-size: .7rem; }
+.row .name small, .row .tickflash, .ch-key { font-size: .78rem; }
+.row .chips { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.row.up-row .name .chip { margin-left: 0; }
+.row.min-row .ico { flex-basis: 40px; align-self: flex-start; padding-top: 4px; }
+.row.min-row .name { display: flex; align-items: baseline; gap: 8px; }
+
+/* short phones (about 568px tall): same type scale, tighter chrome so the nav and the street both stay on screen */
+@media (max-height: 640px) {
+  #hud { gap: 4px; padding-top: calc(4px + var(--safe-top)); padding-bottom: 4px; }
+  .stat { padding: 2px 8px; }
+  .stat-label { font-size: .66rem; }
+  .stat-rate { font-size: .68rem; }
+  #hud .icon-btn { min-height: 44px; }
+  .sh-streak, .sh-momentum { min-height: 28px; padding: 2px 6px; }
+  .sh-label { font-size: .64rem; }
+  #street-status { padding: 6px 10px; }
+  #street-status .goal-text { font-size: .85rem; -webkit-line-clamp: 1; }
+  #street-status .goal-label { font-size: .64rem; }
+  #action-row .action { min-height: 56px; }
+  .ministry-strip button { min-height: 44px; padding: 2px 4px; }
+  .ministry-strip .sc b { font-size: .75rem; }
+  .ministry-strip .sc i { font-size: .64rem; }
+  .nav-btn { min-height: 50px; gap: 1px; font-size: .68rem; }
+  #nav { padding: 3px 6px calc(3px + var(--safe-bottom)); }
+  .row { padding: 8px 10px; }
+  .row .buy { min-height: 48px; }
+  .passive-summary { padding: 8px 10px; }
+}
+html.text-large #hud .stat-value { font-size: 21px; }
+@media (max-height: 640px) { html.text-large .ministry-strip { display: none; } }

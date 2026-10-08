@@ -80,7 +80,7 @@ export function createInitialState(now = Date.now(), seed = newSeedString()) {
       legacy: { disciples: [], converts: [] },
     },
     lifetime: { playSeconds: 0, offlineSecondsCredited: 0 },
-    settings: { music: true, sfx: true, musicVolume: 0.5, sfxVolume: 0.7, muted: false, reducedMotion: 'auto', hints: true },
+    settings: { music: true, sfx: true, musicVolume: 0.5, sfxVolume: 0.7, muted: false, reducedMotion: 'auto', hints: true, textSize: 'normal' },
   };
 }
 

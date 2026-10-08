@@ -163,6 +163,22 @@ export function settingsModal(ctx) {
     });
     motion.append(b);
   }
+  const textSize = h('div', { class: 'setting' }, h('span', { text: 'Text size' }));
+  for (const [val, label] of [['normal', 'Normal'], ['large', 'Large']]) {
+    const on = (s.textSize || 'normal') === val;
+    const b = h('button', { class: `toggle ${on ? 'on' : ''}`, type: 'button', 'aria-pressed': String(on), text: label });
+    b.addEventListener('click', () => {
+      s.textSize = val;
+      for (const sib of textSize.querySelectorAll('button')) {
+        sib.classList.remove('on');
+        sib.setAttribute('aria-pressed', 'false');
+      }
+      b.classList.add('on');
+      b.setAttribute('aria-pressed', 'true');
+      ctx.apply();
+    });
+    textSize.append(b);
+  }
   const nodes = [
     h('h2', { text: 'Settings' }),
     toggle('Mute all', 'muted'),
@@ -171,6 +187,7 @@ export function settingsModal(ctx) {
     toggle('Sound effects', 'sfx'),
     slider('SFX volume', 'sfxVolume'),
     motion,
+    textSize,
     toggle('Gentle hints', 'hints'),
     h(
       'div',
