@@ -171,6 +171,29 @@ export class AudioSystem {
     src.stop(when + dur + 0.05);
   }
 
+  /** A crowd cheering: band-limited noise that swells in and fades out. */
+  cheer(when, dur) {
+    const ctx = this.ctx;
+    if (!ctx || !this.noise) return;
+    for (const [freq, vol] of [[900, 0.1], [1900, 0.07]]) {
+      const src = ctx.createBufferSource();
+      src.buffer = this.noise;
+      src.loop = true;
+      const f = ctx.createBiquadFilter();
+      f.type = 'bandpass';
+      f.frequency.value = freq;
+      f.Q.value = 0.8;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.linearRampToValueAtTime(vol, when + 0.5);
+      g.gain.linearRampToValueAtTime(vol * 0.7, when + dur * 0.6);
+      g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+      src.connect(f).connect(g).connect(this.sfxBus);
+      src.start(when);
+      src.stop(when + dur + 0.05);
+    }
+  }
+
   sfx(name, arg = 0) {
     if (!this.ctx || !this.settings.sfx || this.settings.muted || this.ctx.state !== 'running') return;
     const t = this.ctx.currentTime;
@@ -260,6 +283,30 @@ export class AudioSystem {
         break;
       case 'bossWin':
         [64, 67, 72, 76, 79].forEach((n, i) => this.tone(NOTE(n), t + i * 0.12, 0.5, 'triangle', 0.09));
+        break;
+      case 'fanfare': {
+        // timpani, a rising call in horns, a held chord, and a swell of cheering
+        this.tone(NOTE(36), t, 0.7, 'sine', 0.2, this.sfxBus, 0.005, NOTE(28));
+        this.noiseBurst(t, 0.25, 220, 0.12, 'lowpass');
+        [[60, 0], [64, 0.16], [67, 0.32], [72, 0.5]].forEach(([n, d]) => {
+          this.tone(NOTE(n), t + d, 0.5, 'sawtooth', 0.045, this.sfxBus, 0.02);
+          this.tone(NOTE(n + 12), t + d, 0.5, 'square', 0.025, this.sfxBus, 0.02);
+        });
+        [60, 64, 67, 72, 76].forEach((n) => {
+          this.tone(NOTE(n), t + 0.8, 2.6, 'sawtooth', 0.04, this.sfxBus, 0.06);
+          this.tone(NOTE(n), t + 0.8, 3.2, 'sine', 0.05, this.sfxBus, 0.2);
+        });
+        [84, 88, 91, 96].forEach((n, i) => this.tone(NOTE(n), t + 0.9 + i * 0.09, 0.7, 'triangle', 0.05));
+        this.cheer(t + 0.5, 3.4);
+        this.duckMusic(3.5);
+        break;
+      }
+      case 'pop':
+        this.noiseBurst(t, 0.18, 1800 + Math.random() * 1200, 0.07, 'highpass');
+        this.tone(NOTE(84 + Math.floor(Math.random() * 12)), t + 0.02, 0.35, 'sine', 0.035, this.sfxBus, 0.005);
+        break;
+      case 'tick':
+        this.tone(NOTE(88 + Math.min(8, Math.round(arg * 8))), t, 0.04, 'square', 0.03);
         break;
       case 'passed':
         this.tone(NOTE(67), t, 0.3, 'sine', 0.08, this.sfxBus, 0.01, NOTE(60));

@@ -892,3 +892,13 @@ body.reduce-motion #boss-banner, body.reduce-motion #boss-banner .bb-title { ani
   #moment.boss-dialog .quote, #moment.boss-dialog .ref { display: none; }
   #boss-banner { top: 28%; }
 }
+#moment.boss-dialog .reward.landed { animation: rewardLand .5s ease-out; }
+@keyframes rewardLand { 0% { transform: scale(1.35); filter: brightness(2); } 100% { transform: scale(1); filter: none; } }
+body.reduce-motion #moment.boss-dialog .reward.landed { animation: none; }
+#boss-banner.victory .bb-title { animation: victoryTitle 3.6s ease-in-out both, slamFlash .9s ease-in-out 3; }
+@keyframes victoryTitle { 0% { transform: scale(2.4); opacity: 0; letter-spacing: .3em; } 12% { transform: scale(1); opacity: 1; letter-spacing: 0; } 85% { opacity: 1; } 100% { opacity: 0; } }
+#boss-banner.victory .bb-title::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); transform: translateX(-120%); animation: shine 1.4s ease-out .5s 2; }
+#boss-banner.victory .bb-title { position: relative; overflow: hidden; }
+@keyframes shine { to { transform: translateX(120%); } }
+body.reduce-motion #boss-banner.victory .bb-title, body.reduce-motion #boss-banner.victory .bb-title::after { animation: none; }
+

@@ -113,6 +113,12 @@ export class UI {
     scene.addEventListener('pointerdown', (e) => {
       if (e.target.closest('#moment')) return;
       this.audio.unlock();
+      const vb = this.game.boss;
+      if (vb?.stage === 'victory') {
+        // a tap skips ahead from the celebration to the Seeds
+        if (vb.t > 1.2) vb.t = Math.max(vb.t, BALANCE.boss.victorySeconds);
+        return;
+      }
       const rect = scene.getBoundingClientRect();
       this.lastTap = { x: e.clientX - rect.left, y: e.clientY - rect.top, t: performance.now() };
       const seedId = this.renderer.hitSeed(e.clientX, e.clientY);
@@ -540,6 +546,31 @@ export class UI {
     }, 2000 + d.tier * 350);
   }
 
+  /** The Seeds from the exchange count up with a ticking sound, then settle with a flash. */
+  countUpReward(el, total) {
+    if (!el || !total) return;
+    const reduce = document.body.classList.contains('reduce-motion');
+    const dur = reduce ? 0 : 1500;
+    const start = performance.now();
+    let lastTick = 0;
+    const step = (now) => {
+      if (!el.isConnected) return;
+      const k = dur ? Math.min(1, (now - start) / dur) : 1;
+      const eased = 1 - (1 - k) * (1 - k) * (1 - k);
+      el.textContent = `+${formatNumber(Math.round(total * eased))} Seeds`;
+      if (k < 1 && now - lastTick > 55) {
+        lastTick = now;
+        this.audio.sfx('tick', k);
+      }
+      if (k < 1) requestAnimationFrame(step);
+      else {
+        el.classList.add('landed');
+        this.audio.sfx('reward');
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
   /** A title card over the street for the big beats of the Professor's exchange. */
   showBossBanner(kicker, title, cls = '', ms = 2200) {
     const el = this.els.bossBanner;
@@ -911,10 +942,16 @@ export class UI {
         case 'bossVictory':
           this.bossReward = d.seeds;
           this.closeTray();
-          this.showBossBanner('FAITHFULLY ANSWERED', 'THE EXCHANGE IS COMPLETE', 'victory', 3200);
-          this.renderer.impactCenter(4, '#fff4c8');
-          this.audio.sfx('bossWin');
-          setTimeout(() => { this.renderer.impactCenter(4, '#ffe9a8'); this.audio.sfx('reward'); }, 700);
+          this.clearToasts();
+          this.hideVerse();
+          this.renderer.fireworkHook = () => this.audio.sfx('pop');
+          this.audio.sfx('fanfare');
+          this.renderer.impactCenter(4, '#ffffff');
+          this.showBossBanner('FAITHFULLY ANSWERED', 'THE EXCHANGE IS COMPLETE', 'victory', 3800);
+          // the beats: a second flash as the title lands, then the street joins in
+          setTimeout(() => this.renderer.impactCenter(4, '#ffe9a8'), 450);
+          setTimeout(() => { this.renderer.impactCenter(3, '#9ada6a'); this.audio.sfx('reward'); }, 1300);
+          setTimeout(() => this.renderer.impactCenter(4, '#fff4c8'), 2300);
           break;
         case 'bossPassed':
           this.audio.sfx('passed');
@@ -1101,7 +1138,7 @@ export class UI {
     if (boss) {
       if (boss.stage === 'intro') return { key: 'boss-intro', cls: 'boss-dialog' };
       if (boss.stage === 'transition') return { key: `boss-trans-${boss.phaseIndex}`, cls: 'boss-dialog' };
-      if (boss.stage === 'victory') return boss.t < 3.3 ? null : { key: 'boss-victory', cls: 'boss-dialog' };
+      if (boss.stage === 'victory') return boss.t < BALANCE.boss.victorySeconds ? null : { key: 'boss-victory', cls: 'boss-dialog' };
       if (boss.stage === 'passed') return { key: 'boss-passed', cls: 'boss-dialog' };
       return null;
     }
@@ -1139,11 +1176,12 @@ export class UI {
       el.append(
         h('h3', { text: 'The exchange is complete' }),
         ...BOSS.victory.map((l) => h('p', { text: l })),
-        this.bossReward ? h('div', { class: 'reward', text: `+${formatNumber(this.bossReward)} Seeds` }) : null,
+        this.bossReward ? h('div', { class: 'reward', id: 'boss-reward', text: '+0 Seeds' }) : null,
         h('div', { class: 'quote', text: BOSS.verseVictory.text }),
         h('span', { class: 'ref', text: BOSS.verseVictory.ref }),
         h('div', { class: 'row-btns' }, h('button', { class: 'btn gold', type: 'button', text: 'Continue', on: { click: () => game.finishBossVictory() } })),
       );
+      this.countUpReward(el.querySelector('#boss-reward'), this.bossReward);
     } else if (want.key === 'boss-passed') {
       const debrief = this.state.gen.bossState.lastDebrief;
       el.append(
@@ -1371,7 +1409,7 @@ export class UI {
   syncAudioMood() {
     const game = this.game;
     const restored = this.state.phase === 'gen2preview' || this.montage;
-    this.audio.setMood(game.inBoss ? 'boss' : restored ? 'hope' : 'street');
+    this.audio.setMood(game.boss?.stage === 'victory' ? 'hope' : game.inBoss ? 'boss' : restored ? 'hope' : 'street');
     const quiet = game.enc?.state === 'conversion';
     this.audio.setAmbience({ rain: restored ? 0.15 : 1, crowd: game.inBoss ? 1.2 : quiet ? 0.2 : 0.5 });
   }

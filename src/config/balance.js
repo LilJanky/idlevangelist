@@ -309,6 +309,7 @@ export const BALANCE = {
     foreshadowSeconds: 960,
     foreshadowSeeds: 500000,
     introSeconds: 3.0,
+    victorySeconds: 4.6, // the celebration plays this long before the Seeds dialog (a tap skips ahead)
     transitionSeconds: 2.6,
     cooldownSeconds: 45, // the crowd needs time to gather again; retrying instantly is not the plan
     autoRespondSeconds: 8, // no line chosen: you press on with a measured answer rather than stalling

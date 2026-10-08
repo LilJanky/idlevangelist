@@ -126,6 +126,11 @@ export class Renderer {
     this.reducedMotion = false;
     this.kick = { proclaim: -10, react: -10, shake: -10, crit: -10, word: -10, bossHit: -10 };
     this.lastCheer = 0;
+    this.fireworks = [];
+    this.confetti = [];
+    this.fwNext = 0;
+    this.fxLast = 0;
+    this.fireworkHook = null;
     this.sparks = [];
     this.seedFlow = [];
     this.screenFlash = { t: -10, a: 0, color: '#fff' };
@@ -213,14 +218,102 @@ export class Renderer {
     this.impact(level, this.focusX, this.feetY - 28, color);
   }
 
-  /** Victory: the plaza erupts. Gold and green sparks rise from all over the street for a few seconds. */
+  /**
+   * Victory: the plaza erupts. Light pours down, fireworks go up over the skyline, confetti falls, the crowd cheers and jumps
+   * (see drawPed) and gold sparks rise from the street. `bt` is seconds since the exchange was answered.
+   */
+  victoryRays(ctx, bt) {
+    const k = Math.min(1, Math.max(0, (bt - 0.15) / 1.0)) * (bt > 5 ? 0.6 : 1);
+    if (k <= 0) return;
+    const W = this.W;
+    const H = this.H;
+    const sway = this.reducedMotion ? 0 : Math.sin(this.now * 0.5) * 0.06;
+    ctx.save();
+    for (let i = -3; i <= 3; i++) {
+      const a = Math.PI / 2 + i * 0.2 + sway;
+      const spread = 0.06 + (i % 2 ? 0.02 : 0);
+      const len = H * 1.4;
+      ctx.fillStyle = `rgba(255,228,150,${(0.075 - Math.abs(i) * 0.008) * k})`;
+      ctx.beginPath();
+      ctx.moveTo(W / 2, -6);
+      ctx.lineTo(W / 2 + Math.cos(a - spread) * len, -6 + Math.sin(a - spread) * len);
+      ctx.lineTo(W / 2 + Math.cos(a + spread) * len, -6 + Math.sin(a + spread) * len);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  victoryFx(ctx, t, bt) {
+    const dt = Math.min(0.05, Math.max(0, t - this.fxLast));
+    this.fxLast = t;
+    const W = this.W;
+    const colors = ['#ffe9a8', '#ff9a8a', '#9ada6a', '#8fc6ff', '#f2c860', '#ffffff', '#d6a0ff'];
+    if (bt < this.fwPrev) this.fwNext = 0.25;
+    this.fwPrev = bt;
+    if (!this.reducedMotion) {
+      while (bt >= this.fwNext) {
+        const early = bt < this.game.balance.boss.victorySeconds;
+        this.fireworks.push({
+          x: W * (0.14 + Math.random() * 0.72), y: this.groundTop - 2, ty: 10 + Math.random() * Math.max(8, this.groundTop - 34),
+          t0: t, dur: 0.42 + Math.random() * 0.15, color: colors[Math.floor(Math.random() * colors.length)], ring: Math.random() < 0.5,
+        });
+        this.fwNext += early ? 0.3 + Math.random() * 0.25 : 1.4 + Math.random();
+      }
+      if (bt < 5.2 && this.confetti.length < 150) {
+        for (let i = 0; i < 3; i++) {
+          this.confetti.push({ x: Math.random() * W, y: -3, vx: (Math.random() - 0.5) * 10, vy: 16 + Math.random() * 16, c: colors[Math.floor(Math.random() * colors.length)], ph: Math.random() * 6 });
+        }
+      }
+    }
+    for (let i = this.fireworks.length - 1; i >= 0; i--) {
+      const f = this.fireworks[i];
+      const k = (t - f.t0) / f.dur;
+      if (k >= 1) {
+        const n = f.ring ? 26 : 20;
+        for (let j = 0; j < n && this.sparks.length < 400; j++) {
+          const ang = (j / n) * Math.PI * 2 + (f.ring ? 0 : Math.random() * 0.4);
+          const v = f.ring ? 36 : 14 + Math.random() * 30;
+          this.sparks.push({ x: f.x, y: f.ty, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, age: 0, life: 0.9 + Math.random() * 0.35, color: f.color, size: 2, gravity: 26 });
+        }
+        this.screenFlash = { t, a: 0.07, color: f.color };
+        this.fireworkHook?.();
+        this.fireworks.splice(i, 1);
+        continue;
+      }
+      const y = f.y + (f.ty - f.y) * (1 - (1 - k) * (1 - k));
+      ctx.fillStyle = '#fff4c8';
+      ctx.fillRect(Math.round(f.x), Math.round(y), 1, 2);
+      ctx.fillStyle = 'rgba(255,220,150,0.5)';
+      ctx.fillRect(Math.round(f.x), Math.round(y) + 2, 1, 3);
+    }
+    for (let i = this.confetti.length - 1; i >= 0; i--) {
+      const c = this.confetti[i];
+      c.ph += dt * 9;
+      c.x += (c.vx + Math.sin(c.ph) * 8) * dt;
+      c.y += c.vy * dt;
+      if (c.y > this.H) {
+        this.confetti.splice(i, 1);
+        continue;
+      }
+      ctx.fillStyle = c.c;
+      if (Math.sin(c.ph) > 0) ctx.fillRect(Math.round(c.x), Math.round(c.y), 2, 1);
+      else ctx.fillRect(Math.round(c.x), Math.round(c.y), 1, 2);
+    }
+    this.celebrate(t);
+    // a warm wash over everything while the light is up
+    const wash = Math.min(1, bt / 0.8) * (bt > 5 ? 0.5 : 1);
+    ctx.fillStyle = `rgba(255,214,130,${0.08 * wash})`;
+    ctx.fillRect(0, 0, W, this.H);
+  }
+
   celebrate(t) {
-    if (this.reducedMotion || t - this.lastCheer < 0.16) return;
+    if (this.reducedMotion || t - this.lastCheer < 0.14) return;
     this.lastCheer = t;
     const x = this.W * (0.08 + Math.random() * 0.84);
     const y = this.groundTop + 10 + Math.random() * (this.feetY - this.groundTop - 18);
     const colors = ['#ffe9a8', '#fff4c8', '#9ada6a', '#f2c860'];
-    this.burst(x, y, { n: 9, color: colors[Math.floor(Math.random() * colors.length)], speed: 34, life: 0.8, gravity: 38, size: 2 });
+    this.burst(x, y, { n: 8, color: colors[Math.floor(Math.random() * colors.length)], speed: 34, life: 0.8, gravity: 38, size: 2 });
   }
 
   impactCenter(level, color) {
@@ -473,10 +566,16 @@ export class Renderer {
     this.drawBossBackdrop(ctx, groundTop, wp, t);
     this.drawGround(ctx, groundTop, wp, t);
     this.drawLamps(ctx, groundTop, wp, t);
+    const victory = game.boss?.stage === 'victory';
+    if (victory) this.victoryRays(ctx, game.boss.t);
     this.drawPeopleAndProps(ctx, groundTop, wp, t);
-    if (game.boss?.stage === 'victory') this.celebrate(t);
     this.updateSparks(t);
     this.drawSparks(ctx);
+    if (victory) this.victoryFx(ctx, t, game.boss.t);
+    else if (this.fireworks.length || this.confetti.length) {
+      this.fireworks.length = 0;
+      this.confetti.length = 0;
+    }
     this.drawSeedFlow(ctx, t);
     if (R < 0.95) this.drawRain(ctx, wp, t);
     this.drawConversionEffects(ctx, t);
@@ -926,7 +1025,13 @@ export class Renderer {
     const still = p.standing || p.hold;
     const frame = still ? this.idleFrame(t, p.id * 0.19) : this.walkFrame(p.phase, p.speed, 2.05);
     const protagX = wp.protagX * this.W;
-    const dir = p.react > 0 ? (x > protagX ? -1 : 1) : p.dir;
+    const cheering = this.game.boss?.stage === 'victory' && !this.reducedMotion && this.game.boss.t > 0.25;
+    let dir = p.react > 0 ? (x > protagX ? -1 : 1) : p.dir;
+    let jump = 0;
+    if (cheering) {
+      dir = x < 0.7 * this.W ? 1 : -1;
+      jump = Math.round(Math.abs(Math.sin(t * 7.5 + p.id * 1.7)) * 3);
+    }
     drawShadow(ctx, x, y, 8, 0.18);
     if (lit) {
       // warm = meaning: someone open to a moment stands in a small pool of gold light
@@ -937,12 +1042,13 @@ export class Renderer {
       ctx.fillStyle = `rgba(255,236,170,${pulse * 0.9})`;
       ctx.fillRect(Math.round(x) - 3, Math.round(y) - 1, 6, 1);
     }
-    this.drawStreetReflection(ctx, x, y, 1, {
-      look, dir, frame, dim: Math.min(0.8, dim), fog: FOG, pose: p.react > 0 ? 'react' : still ? 'idle' : 'walk',
+    const pose = cheering || p.react > 0 ? 'react' : still ? 'idle' : 'walk';
+    this.drawStreetReflection(ctx, x, y - jump, 1, {
+      look, dir, frame, dim: Math.min(0.8, dim), fog: FOG, pose,
       bob: still ? frame : frame & 1, time: t,
     }, wp, 0.5 - p.lane * 0.1);
-    drawPerson(ctx, x, y, 1, {
-      look, dir, frame, dim: Math.min(0.8, dim), fog: FOG, pose: p.react > 0 ? 'react' : still ? 'idle' : 'walk',
+    drawPerson(ctx, x, y - jump, 1, {
+      look, dir, frame, dim: Math.min(0.8, dim), fog: FOG, pose,
       bob: still ? frame : frame & 1, time: t,
     });
     if (p.done) {
@@ -964,7 +1070,9 @@ export class Renderer {
     const x = wp.protagX * this.W;
     let pose = this.game.activeEncounter || (this.game.boss && this.game.inBoss) ? 'talk' : 'hold';
     const firm = this.game.street.standFirm && !this.montage;
+    const cheering = this.game.boss?.stage === 'victory' && !this.reducedMotion;
     if (t - this.kick.proclaim < 0.22) pose = 'proclaim';
+    else if (cheering && Math.floor(t * 4) % 2 === 0) pose = 'proclaim';
     else if (firm && Math.floor(t * 3) % 2 === 0) pose = 'proclaim';
     const walking = this.montage && wp.age === 'old' && x > 0.12 * this.W + 1;
     const frame = walking ? this.walkFrame(t, 0.11, 1.7) : this.idleFrame(t, 0.12);
@@ -1515,7 +1623,7 @@ export class Renderer {
     this.focusX = x;
     drawShadow(ctx, x, feet, 18, 0.32);
     const frame = this.idleFrame(t, 0.31, 1.1);
-    const pose = boss.stage === 'transition' ? 'react' : 'talk';
+    const pose = boss.stage === 'transition' || boss.stage === 'victory' ? 'react' : 'talk';
     this.drawStreetReflection(ctx, x, feet, 2, { look: PROFESSOR, dir: -1, eyes: true, glasses: true, scarf: '#7a3a3a', pose, frame, bob: frame, time: t }, wp, 1);
     drawPerson(ctx, x, feet, 2, { look: PROFESSOR, dir: -1, eyes: true, glasses: true, scarf: '#7a3a3a', pose, frame, bob: frame, time: t });
     this.drawLectern(ctx, x, feet);
