@@ -81,7 +81,7 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
     const { game } = window.__idlevangelist; const g = game.state.gen;
     g.genSeconds += 1500; game.addSeeds(5e8); game.checkUnlocks(true);
     for (const [id, n] of [['tracts', 60], ['bibles', 50], ['streetTeam', 30], ['bibleStudy', 20], ['discipleship', 10]]) game.buyMinistry(id, n);
-    g.fundsUnlocked = true; g.funds = 5; game.specialTimer = 1e9; game.eventTimer = 1e9; g.scripturesUnlocked = ['romans1_20', 'john3_16'];
+    for (const d of g.disciples) { game.buyDisciple?.(d.id); game.trainDisciple?.(d.id); } g.fundsUnlocked = true; g.funds = 5; game.specialTimer = 1e9; game.eventTimer = 1e9; g.scripturesUnlocked = ['romans1_20', 'john3_16'];
   });
   await page.waitForTimeout(1200); await check('street');
   for (const t of ['ministry', 'upgrades']) { await page.locator(`button[data-tab="${t}"]`).click(); await page.waitForTimeout(400); await check(t); }

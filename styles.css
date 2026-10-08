@@ -835,3 +835,6 @@ body:not(.reduce-motion) .modal.intro .btn.gold { animation: beginPulse 1.6s eas
 .setting { min-height: 48px; }
 .ministry-strip button { min-height: 44px; }
 #boss-row .btn { min-height: 44px; }
+.note b, .note strong { color: var(--paper-ink); }
+.assign button { background: #f6ecd2; color: #24160c; }
+.assign button.on { background: #7fd0bc; color: #0e2a24; border-color: #0e0806; }
