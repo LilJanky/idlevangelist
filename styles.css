@@ -1046,3 +1046,15 @@ html.text-large { font-size: 116%; }
 }
 html.text-large #hud .stat-value { font-size: 21px; }
 @media (max-height: 640px) { html.text-large .ministry-strip { display: none; } }
+
+/* talking on a short phone: the three answers must all fit, so the chrome around them gives way */
+@media (max-height: 640px) {
+  #app.in-talk #street-hud { display: none; }
+  #app.in-talk #hud { padding-bottom: 4px; }
+  #app.in-talk .choice { font-size: .85rem; line-height: 1.2; padding: 6px 10px; }
+  #app.in-talk #choice-box { gap: 5px; }
+  #app.in-talk .cb-head { display: none; }
+  #app.in-talk #encounter-card p, #app.in-talk #enc-statement { font-size: .85rem; line-height: 1.22; min-height: 0; }
+  #app.in-talk .enc-head { font-size: .66rem; }
+  #app.in-talk #nav { display: none; }
+}

@@ -66,15 +66,16 @@ const STRUCT = () => {
 };
 
 const problems = [];
-for (const [w, h] of [[390, 844], [320, 568]]) {
+for (const [w, h, large] of [[390, 844, false], [320, 568, false], [390, 844, true]]) {
   const browser = await chromium.launch({ executablePath: exe, headless: true });
   const page = await (await browser.newContext({ viewport: { width: w, height: h } })).newPage();
   await page.goto(URL); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForTimeout(600);
   const check = async (screen) => {
     await page.evaluate(() => document.querySelectorAll('.toast,#toasts').forEach((t) => { t.style.display = 'none'; }));
-    for (const x of await page.evaluate(AUDIT)) problems.push(`${w}x${h} ${screen}: ${x.ratio}:1 (needs ${x.need}) "${x.text}" ${x.sel}`);
-    for (const x of await page.evaluate(STRUCT)) problems.push(`${w}x${h} ${screen}: ${x}`);
+    for (const x of await page.evaluate(AUDIT)) problems.push(`${w}x${h}${large ? ' large' : ''} ${screen}: ${x.ratio}:1 (needs ${x.need}) "${x.text}" ${x.sel}`);
+    for (const x of await page.evaluate(STRUCT)) problems.push(`${w}x${h}${large ? ' large' : ''} ${screen}: ${x}`);
   };
+  if (large) await page.evaluate(() => { document.documentElement.classList.add('text-large'); });
   await check('intro');
   await page.getByRole('button', { name: 'Begin' }).click(); await page.waitForTimeout(500);
   await page.evaluate(() => {
