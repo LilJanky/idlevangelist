@@ -125,11 +125,11 @@ export function paintPortrait(ctx, id, mood, h) {
   const guarded = mood === 'guarded';
   const warm = mood === 'warm';
   const ey = cy - 1.5;
-  const eyeH = guarded || a.brow === 'tired' ? 5 : 7;
+  const eyeH = guarded || a.brow === 'tired' ? 4 : 5;
   const eyeY = Math.round(ey + (7 - eyeH));
   for (const ex of [cx - 4.5, cx + 4.5]) {
     box(Math.round(ex), eyeY, 3, eyeH, ink);
-    box(Math.round(ex), eyeY, 2, 2, white);
+    box(Math.round(ex), eyeY, 1, 1, white);
   }
   const browC = hair.sh;
   const by = ey - 3;
@@ -161,7 +161,7 @@ export function paintPortrait(ctx, id, mood, h) {
   let mouth = a.mouth;
   if (warm) mouth = a.mouth === 'grin' ? 'grin' : 'smile';
   if (guarded) mouth = 'flat';
-  if (mouth === 'grin') { box(Math.round(cx - 3), my, 8, 4, '#8a2e32'); box(Math.round(cx - 3), my, 8, 1, white); }
+  if (mouth === 'grin') { box(Math.round(cx - 2), my, 6, 2, '#8a2e32'); box(Math.round(cx - 2), my, 6, 1, white); }
   else if (mouth === 'smile') { box(Math.round(cx - 2), my + 1, 6, 1, lip); box(Math.round(cx - 3), my, 1, 1, lip); box(Math.round(cx + 4), my, 1, 1, lip); }
   else if (mouth === 'smirk') { box(Math.round(cx - 2), my + 1, 5, 1, lip); box(Math.round(cx + 3), my, 2, 1, lip); }
   else if (mouth === 'halfsmile') { box(Math.round(cx - 2), my + 1, 6, 1, lip); box(Math.round(cx + 4), my, 1, 1, lip); }

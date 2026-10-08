@@ -892,12 +892,12 @@ export class Renderer {
 
   drawPed(ctx, p, wp, conv, laneY, t) {
     const R = wp.restoration;
-    const base = [0.52, 0.38, 0.26][p.lane];
+    const base = [0.2, 0.12, 0.06][p.lane];
     const lit = this.markersOn && p.opp && !p.done;
     let dim = Math.max(0.05, base * (1 - R * 0.8)) + conv * 0.3;
     if (this.game.inBoss) dim *= 0.8;
     if (lit) dim = Math.min(dim, 0.06);
-    if (p.done) dim = Math.max(dim, 0.45);
+    if (p.done) dim = Math.max(dim, 0.4);
     const look = lookFromInt(p.look);
     if (p.friend) look.accessory = 'book';
     else if (p.tag && EVENT_ACCESSORY[p.tag]) look.accessory = EVENT_ACCESSORY[p.tag];
@@ -921,7 +921,7 @@ export class Renderer {
     this.drawStreetReflection(ctx, x, y, 1, {
       look, dir, frame, dim: Math.min(0.8, dim), fog: FOG, pose: p.react > 0 ? 'react' : still ? 'idle' : 'walk',
       bob: still ? frame : frame & 1, time: t,
-    }, wp, 0.88 - p.lane * 0.14);
+    }, wp, 0.5 - p.lane * 0.1);
     drawPerson(ctx, x, y, 1, {
       look, dir, frame, dim: Math.min(0.8, dim), fog: FOG, pose: p.react > 0 ? 'react' : still ? 'idle' : 'walk',
       bob: still ? frame : frame & 1, time: t,

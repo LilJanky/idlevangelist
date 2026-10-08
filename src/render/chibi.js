@@ -162,7 +162,6 @@ export function buildChibi(char, tier, h) {
   if (char.backAccessory === 'crossbody' || char.backAccessory === 'bag') {
     box(bx - 3.6, hipY - 3.2, 3.4, 3, bag.base);
     box(bx - 3.6, hipY - 3.2, 3.4, 0.8, bag.hi);
-    for (let i = 0; i < 5; i++) px(bx - 3 + i * 1.1, shoulderY + 1 + i * 1.3, bag.base);
   }
   if (char.backAccessory === 'tote') {
     const t2 = mat('#e8dcc0', 0.2);
@@ -195,18 +194,20 @@ export function buildChibi(char, tier, h) {
   }
   // beard: a flat band that follows the jaw
   if (char.beard) blob(hx + 0.4, headCY + 2.4, headR - 0.5, headR - 2.4, hair, { test: (x, y, nx, ny) => ny > 0.15, rim: false });
-  // face: two tall dark eyes with a white glint, a small blush, a tiny mouth. No nose: nothing to go wrong at this size.
+  // face: two small dark dot eyes (no whites: they read as staring at this size), soft blush, a tiny mouth only on the big figures.
   if (char.eyes) {
     const ey = headCY - 0.2;
-    box(hx + 1.6, ey, 1.2, 2.2, ink);
-    box(hx + 3.6, ey, 1.2, 2.2, ink);
-    box(hx + 1.6, ey, 0.7, 0.8, white);
-    box(hx + 3.6, ey, 0.7, 0.8, white);
-    if (char.tired) { box(hx + 1.4, ey - 0.8, 1.6, 0.6, skin.sh); box(hx + 3.4, ey - 0.8, 1.6, 0.6, skin.sh); }
-    box(hx + 0.4, ey + 2.4, 1.2, 0.8, tint(h.mix(char.skin, '#e8706a', 0.45)));
-    const mouth = tint(h.mix(char.skin, '#7a2c2c', 0.65));
-    if (char.smile) box(hx + 2.2, ey + 3.4, 2.4, 0.8, mouth);
-    else box(hx + 2.6, ey + 3.4, 1.4, 0.7, mouth);
+    const eye = tint(h.mix('#2a1c24', char.skin, 0.1));
+    const ew = big ? 0.6 : 1;
+    box(hx + 1.8, ey, ew, 1.8, eye);
+    box(hx + 3.8, ey, ew, 1.8, eye);
+    if (char.tired) { box(hx + 1.6, ey - 0.8, 1.6, 0.6, skin.sh); box(hx + 3.6, ey - 0.8, 1.6, 0.6, skin.sh); }
+    box(hx + 0.8, ey + 2.2, 1.4, 0.9, tint(h.mix(char.skin, '#e8706a', 0.35)));
+    if (big) {
+      const mouth = tint(h.mix(char.skin, '#8a3c3c', 0.55));
+      if (char.smile) box(hx + 2.4, ey + 3.4, 2, 0.7, mouth);
+      else box(hx + 2.8, ey + 3.4, 1.2, 0.6, mouth);
+    }
   }
   if (char.glasses) {
     const rim = tint('#262230');
