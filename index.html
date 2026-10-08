@@ -41,7 +41,7 @@
       </header>
 
       <main id="scene" aria-label="Street scene">
-        <canvas id="world" aria-hidden="true"></canvas>
+        <div id="stage"><canvas id="world" aria-hidden="true"></canvas><div id="floaters" aria-hidden="true"></div></div>
         <div id="encounter-card" class="hidden" role="status">
           <div class="enc-main">
             <div id="enc-portrait-frame" class="enc-portrait-frame" aria-hidden="true">
@@ -62,7 +62,6 @@
             </div>
           </div>
         </div>
-        <div id="floaters" aria-hidden="true"></div>
         <div id="word-slam" class="hidden" aria-hidden="true"><div class="ws-tier"></div><div class="ws-crest"></div><div class="ws-mult"></div><div class="ws-total"></div><div class="ws-sub"></div></div>
         <div id="verse-pop" class="hidden" role="status" aria-live="polite"><div class="vp-text"></div><div class="vp-ref"></div></div>
         <div id="toasts" aria-live="polite"></div>

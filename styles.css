@@ -1058,3 +1058,12 @@ html.text-large #hud .stat-value { font-size: 21px; }
   #app.in-talk .enc-head { font-size: .66rem; }
   #app.in-talk #nav { display: none; }
 }
+/* ================= A steady world: the street canvas never changes size =================
+   The canvas lives in a fixed-size "stage" pinned to the bottom of the scene. When the panel below grows or shrinks (a conversation,
+   the Professor, a tab change) the scene window changes size and the stage slides with a short ease, instead of the street being
+   re-laid-out and redrawn at a new size (which was the visible "jump"). */
+#scene { background: #1c1a28; }
+#stage { position: absolute; left: 0; right: 0; bottom: 0; height: var(--stage-h, 100%); will-change: transform; }
+#stage #world { position: absolute; inset: 0; }
+#stage #floaters { position: absolute; inset: 0; }
+

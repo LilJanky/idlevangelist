@@ -119,7 +119,7 @@ export class UI {
         if (vb.t > 1.2) vb.t = Math.max(vb.t, BALANCE.boss.victorySeconds);
         return;
       }
-      const rect = scene.getBoundingClientRect();
+      const rect = document.getElementById('stage').getBoundingClientRect();
       this.lastTap = { x: e.clientX - rect.left, y: e.clientY - rect.top, t: performance.now() };
       const seedId = this.renderer.hitSeed(e.clientX, e.clientY);
       const id = seedId !== null ? seedId : this.renderer.hitSpecial(e.clientX, e.clientY, BALANCE.specials.hitRadiusPx);

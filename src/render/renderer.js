@@ -165,6 +165,8 @@ export class Renderer {
     }
     this.scale = rect.width / this.W;
     this.H = Math.max(96, Math.round(rect.height / this.scale));
+    // how tall the scene window is in an ordinary street moment: the ground line is placed for that, and taller windows just show more sky
+    this.normalH = this.normalCssH ? Math.min(this.H, Math.round(this.normalCssH / this.scale)) : null;
     if (this.canvas.width !== this.W || this.canvas.height !== this.H) {
       this.canvas.width = this.W;
       this.canvas.height = this.H;
@@ -317,7 +319,7 @@ export class Renderer {
   }
 
   impactCenter(level, color) {
-    this.impact(level, this.W / 2, this.H * 0.52, color);
+    this.impact(level, this.W / 2, this.normalH ? this.H - this.normalH * 0.48 : this.H * 0.52, color);
   }
 
   updateSparks(t) {
@@ -421,7 +423,8 @@ export class Renderer {
 
   /** Where the buildings meet the pavement. Above is sky and storefronts; below is the whole walkable street. */
   get groundTop() {
-    return Math.round(this.H * 0.42);
+    if (!this.normalH) return Math.round(this.H * 0.42);
+    return this.H - Math.round(this.normalH * 0.58);
   }
 
   focusAnchor() {

@@ -70,9 +70,34 @@ ui = new UI({
   debugFactory: debugMode ? createDebugTools(game, { saveNow }) : null,
 });
 ui.init();
-renderer.resize();
+// The stage (canvas) is sized once per window size, never per panel state, and slides when the scene window changes.
+const stageEl = document.getElementById('stage');
+const sceneEl = document.getElementById('scene');
+const appEl = document.getElementById('app');
+function layoutStage() {
+  const appH = appEl.clientHeight;
+  const navH = document.getElementById('nav').offsetHeight;
+  const short = appH <= 700;
+  stageEl.style.setProperty('--stage-h', `${Math.max(240, appH - navH - 96)}px`);
+  renderer.normalCssH = Math.max(200, appH - navH - (short ? 98 : 118) - (short ? 200 : 173));
+  renderer.resize();
+}
+layoutStage();
 new ResizeObserver(() => renderer.resize()).observe(canvas);
-window.addEventListener('resize', () => renderer.resize());
+window.addEventListener('resize', layoutStage);
+let lastSceneH = sceneEl.clientHeight;
+new ResizeObserver(() => {
+  const h = sceneEl.clientHeight;
+  const d = lastSceneH - h;
+  lastSceneH = h;
+  if (!d || document.body.classList.contains('reduce-motion')) return;
+  const cur = new DOMMatrixReadOnly(getComputedStyle(stageEl).transform).m42 || 0;
+  stageEl.style.transition = 'none';
+  stageEl.style.transform = `translateY(${cur + d}px)`;
+  void stageEl.offsetHeight;
+  stageEl.style.transition = 'transform .32s cubic-bezier(.2,.8,.2,1)';
+  stageEl.style.transform = 'translateY(0)';
+}).observe(sceneEl);
 
 if (!storageOk) ui.toast('Saving is unavailable here; progress lasts for this session only.', '', 6000);
 if (loaded.status === 'corrupt') ui.toast('A damaged save was set aside. Starting fresh.', '', 6000);
