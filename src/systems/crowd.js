@@ -202,8 +202,16 @@ export class CrowdSystem {
     for (let i = this.peds.length - 1; i >= 0; i--) {
       const p = this.peds[i];
       // the crowd that gathers for the lecture stands in open spots, shoulder to shoulder but not on top of each other
-      if (gather && !p.standing && p.lane >= 1 && p.x > 0.38 && p.x < 0.96 && p.id % 3 !== 0 && !this.peds.some((q) => q !== p && q.standing && q.lane === p.lane && Math.abs(q.x - p.x) < cfg.queueGap + 0.01)) p.standing = true;
-      if (!gather && p.standing) p.standing = false;
+      // the audience: they stand in open spots (never on the lectern or the street team's side) and face the Professor
+      if (gather && !p.standing && p.lane >= 1 && p.x > 0.38 && p.x < 0.96 && !(p.lane === 2 && Math.abs(p.x - 0.7) < 0.1) && p.id % 3 !== 0 && !this.peds.some((q) => q !== p && q.standing && q.lane === p.lane && Math.abs(q.x - p.x) < cfg.queueGap + 0.01)) {
+        p.standing = true;
+        p.dir0 = p.dir;
+      }
+      if (gather && p.standing) p.dir = p.x < 0.7 ? 1 : -1;
+      if (!gather && p.standing) {
+        p.standing = false;
+        if (p.dir0 !== undefined) p.dir = p.dir0;
+      }
       if (p.goalX != null && !p.hold && !paused && (p.goalX - p.x) * p.dir <= p.speed * speedScale * dt) {
         p.x = p.goalX;
         p.hold = true;

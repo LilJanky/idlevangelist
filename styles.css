@@ -929,4 +929,26 @@ body.reduce-motion .modal.gen-complete .pending { opacity: 1; transform: none; }
 @media (max-width: 359px) { #montage .title { font-size: 28px; } }
 body.reduce-motion #montage .title { animation: none; }
 #tap-hint { bottom: auto; top: 10px; }
-
+/* ================= The Professor: only what can be used is on screen ================= */
+#app.boss-fight #street-status, #app.boss-fight #ministry-strip, #app.boss-fight #boss-row, #app.boss-fight #preview-card { display: none !important; }
+#app.boss-fight #btn-word { display: none; }
+#app.boss-fight #action-row { display: none; }
+#app.boss-fight.boss-press #action-row { display: grid; grid-template-columns: 1fr; flex: 1 1 100%; }
+#app.boss-fight.boss-press #btn-answer { min-height: 60px; }
+#app.boss-fight #street-top-row:not(:has(#action-row:not([style*="none"]))) { }
+#boss-panel { margin: 0 0 6px; padding: 8px 10px; background: var(--paper); color: var(--paper-ink); border: 2px solid #0e0806; box-shadow: inset 0 0 0 1px var(--paper-edge), 0 3px 0 #0e0806; }
+#boss-panel .bp-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+#boss-panel .bp-head b { color: #8f1c24; }
+#boss-panel .bp-pips { display: flex; gap: 4px; }
+#boss-panel .bp-pips i { width: 14px; height: 10px; border: 2px solid #0e0806; background: #cdb98a; }
+#boss-panel .bp-pips i.now { background: #c79a2e; animation: pulse 1.2s ease-in-out infinite; }
+#boss-panel .bp-pips i.done { background: #2c6a2c; }
+#boss-panel .bp-line { margin-top: 5px; font-family: var(--serif); font-size: .95rem; line-height: 1.3; }
+#boss-panel.stage-window { background: #f6e7b0; }
+#boss-panel.stage-window .bp-line { font-weight: 700; }
+body.reduce-motion #boss-panel .bp-pips i.now { animation: none; }
+#app.boss-press #boss-panel .bp-line { font-size: .85rem; }
+#app.boss-press #boss-panel { margin-bottom: 4px; }
+#app.boss-press #word-tray { margin-top: 0; }
+@media (max-height: 640px) { #boss-panel .bp-line { font-size: .8rem; } #app.boss-press #boss-panel .bp-line { display: none; } }
+@media (max-height: 640px) { #app.boss-press #boss-panel { display: none; } #app.boss-press #word-tray { margin-bottom: 4px; } #app.boss-press .verse-btn { min-height: 44px; } #app.boss-fight.boss-press #btn-answer { min-height: 48px; } }

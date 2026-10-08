@@ -65,7 +65,7 @@ export class UI {
     this.els = {
       scene: $('scene'), card: $('encounter-card'), name: $('enc-name'), label: $('enc-label'), statement: $('enc-statement'),
       portrait: $('enc-portrait'), portraitFrame: $('enc-portrait-frame'),
-      resist: $('enc-resist'), resistGhost: $('enc-resist-ghost'), bossBanner: $('boss-banner'), resistNum: $('enc-resist-num'), timerWrap: $('enc-timer-wrap'), timer: $('enc-timer'),
+      bossPanel: $('boss-panel'), resist: $('enc-resist'), resistGhost: $('enc-resist-ghost'), bossBanner: $('boss-banner'), resistNum: $('enc-resist-num'), timerWrap: $('enc-timer-wrap'), timer: $('enc-timer'),
       seedIcon: $('seed-icon'),
       hud: $('street-hud'), shStreak: $('sh-streak'), shMult: $('sh-mult'), shCount: $('sh-count'), shFuse: $('sh-fuse'), shPips: $('sh-pips'), shMomentum: $('sh-momentum'), shMomLabel: $('sh-mom-label'), shFill: $('sh-fill'), resistWrap: $('enc-resist-wrap'),
       wordSlam: $('word-slam'), versePop: $('verse-pop'), floaters: $('floaters'), toasts: $('toasts'), moment: $('moment'), tapHint: $('tap-hint'),
@@ -1327,7 +1327,11 @@ export class UI {
     const pressing = enc?.kind === 'boss' && enc.state === 'active' && enc.step === 'press' && !enc.resolved;
     const word = els.btnWord;
     els.scene.classList.toggle('boss-fight', !!game.boss);
-    document.getElementById('app').classList.toggle('boss-press', pressing);
+    const appEl = document.getElementById('app');
+    appEl.classList.toggle('boss-press', pressing);
+    appEl.classList.toggle('boss-fight', !!game.boss);
+    appEl.dataset.boss = game.boss ? game.boss.stage : '';
+    this.syncBossPanel();
     els.streetTop.classList.toggle('has-answer', pressing);
     els.actionRow.classList.toggle('has-answer', pressing);
     setHidden(els.btnAnswer, !pressing);
@@ -1345,7 +1349,7 @@ export class UI {
       this.setCd(els.wordCd, 0, 1);
       const cd = game.cool.answer;
       els.btnAnswer.disabled = cd > 0.05;
-      setText(els.answerSub, cd > 0.05 ? `${cd.toFixed(0)}s` : 'Press your point');
+      setText(els.answerSub, cd > 0.05 ? `${Math.ceil(cd)}s` : 'Press your point');
       this.setCd(els.answerCd, cd, this.cdTotal.answer);
     } else {
       const ready = game.wordReady;
@@ -1445,6 +1449,42 @@ export class UI {
         h('span', { class: 'ch-key', text: 'ABC'[i] }),
         h('span', { class: 'ch-text', text: line.say })));
     });
+  }
+
+  /**
+   * During the Professor only what can be used is shown. This panel says where you are (three arguments) and what to do now;
+   * the goal card, ministry strip, Proclaim button and boss row are hidden (see `.boss-fight` in the stylesheet).
+   */
+  syncBossPanel() {
+    const { game } = this;
+    const el = this.els.bossPanel;
+    const boss = game.boss;
+    const enc = game.activeEncounter;
+    const choosing = enc && (enc.step === 'respond' || enc.step === 'rebut') && !enc.resolved;
+    const show = !!boss && this.tab === 'street' && !choosing && boss.stage !== 'victory' && boss.stage !== 'passed';
+    setHidden(el, !show);
+    if (!show) {
+      this.sigs.bossPanel = null;
+      return;
+    }
+    const idx = boss.phaseIndex;
+    const secs = Math.max(0, Math.ceil(game.windowSeconds - boss.t));
+    let line;
+    if (boss.stage === 'window') line = `The crowd is listening. Tap people with a bubble: ${boss.attention} reached \u00b7 ${secs}s`;
+    else if (boss.stage === 'argument') line = 'Bring a passage that answers his argument (a good fit hits hardest), then press your point.';
+    else if (boss.stage === 'transition') line = 'He gathers his next point\u2026';
+    else line = 'He is about to speak\u2026';
+    const sig = `${boss.stage}|${idx}|${line}`;
+    if (this.sigs.bossPanel === sig) return;
+    this.sigs.bossPanel = sig;
+    clear(el);
+    el.className = `stage-${boss.stage}`;
+    const pips = h('div', { class: 'bp-pips', 'aria-hidden': 'true' });
+    for (let i = 0; i < 3; i++) pips.append(h('i', { class: i < idx || (i === idx && boss.stage === 'window') ? 'done' : i === idx ? 'now' : '' }));
+    el.append(
+      h('div', { class: 'bp-head' }, h('b', { text: `Argument ${['I', 'II', 'III'][Math.min(2, idx)]} / III` }), pips),
+      h('div', { class: 'bp-line', text: line }),
+    );
   }
 
   /** A thin cooldown bar: full width right after use, empty when ready. */

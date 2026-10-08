@@ -238,7 +238,7 @@ export const BALANCE = {
     cap: 14,
     spawnInterval: [0.55, 1.1],
     speed: [10, 20], // % of scene width per second x 0.01 (normalized units/sec * 100)
-    gatherCapBonus: 6,
+    gatherCapBonus: 2,
     maxHold: 5.5, // seconds an arriving gathering (bus, rain) stands before drifting on, however long their moment lasts
     queueGap: 0.075, // a walker will not close in on a slower walker ahead of them in the same lane (a sprite is about 0.1 of the width)
     opportunityChance: 0.6, // share of passersby who are open to a brief engagement
