@@ -901,4 +901,31 @@ body.reduce-motion #moment.boss-dialog .reward.landed { animation: none; }
 #boss-banner.victory .bb-title { position: relative; overflow: hidden; }
 @keyframes shine { to { transform: translateX(120%); } }
 body.reduce-motion #boss-banner.victory .bb-title, body.reduce-motion #boss-banner.victory .bb-title::after { animation: none; }
+/* ================= Generation Complete: a printed certificate that reveals itself ================= */
+.modal.gen-complete { background: var(--paper); color: var(--paper-ink); box-shadow: inset 0 0 0 2px var(--paper-edge), inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--paper-edge), 0 6px 0 rgba(0,0,0,.5); padding: 18px 16px; }
+.modal.gen-complete .emblem { width: 56px; height: 56px; margin: -4px auto 0; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' shape-rendering='crispEdges'><rect x='11' y='2' width='2' height='14' fill='%23c79a2e'/><rect x='7' y='6' width='10' height='2' fill='%23c79a2e'/><rect x='11' y='16' width='2' height='6' fill='%232c6a2c'/><rect x='7' y='14' width='4' height='3' fill='%233f8a3a'/><rect x='13' y='12' width='4' height='3' fill='%234f9a44'/><rect x='3' y='3' width='2' height='2' fill='%23c79a2e'/><rect x='19' y='4' width='2' height='2' fill='%23c79a2e'/><rect x='5' y='9' width='1' height='1' fill='%23c79a2e'/></svg>") center / contain no-repeat; image-rendering: pixelated; }
+.modal.gen-complete h2 { text-align: center; color: #7a4a08; text-shadow: 0 2px 0 rgba(255,255,255,.5); }
+.modal.gen-complete p, .modal.gen-complete .stat-grid dd { color: var(--paper-ink); }
+.modal.gen-complete h3, .modal.gen-complete .stat-grid dt { color: var(--paper-soft); }
+.modal.gen-complete p { text-align: center; }
+.modal.gen-complete .verse { background: #e4d09c; border-left-color: #b3262e; color: var(--paper-ink); }
+.modal.gen-complete .verse span { color: var(--paper-soft); }
+.modal.gen-complete .stat-grid { border-top: 2px dashed var(--paper-edge); padding-top: 8px; }
+.modal.gen-complete .faith-reveal { background: #2c1f24; border: 2px solid #0e0806; box-shadow: inset 0 0 0 1px #b3262e; color: #f4e9d2; }
+.modal.gen-complete .faith-reveal .big { font-family: 'IV Pixel', var(--mono); font-weight: 400; font-size: 56px; color: #ffd45a; text-shadow: 0 3px 0 #7a1c1c; padding: 4px 0; }
+.modal.gen-complete .faith-reveal .big.landed { animation: rewardLand .45s ease-out; }
+.modal.gen-complete .faith-reveal .breakdown span { color: #f4e9d2; }
+.modal.gen-complete .faith-reveal .breakdown span.off { color: #c8bda6; }
+.modal.gen-complete .note { background: #e4d09c; color: var(--paper-ink); border-left-color: var(--paper-gold); }
+.modal.gen-complete .btns .btn { min-height: 52px; font-size: 14px; }
+.modal.gen-complete .pending { opacity: 0; transform: translateY(6px); }
+.modal.gen-complete .stat-grid dt, .modal.gen-complete .stat-grid dd, .modal.gen-complete p, .modal.gen-complete .verse, .modal.gen-complete h3, .modal.gen-complete .faith-reveal, .modal.gen-complete .breakdown span, .modal.gen-complete .people, .modal.gen-complete .btns { transition: opacity .35s ease-out, transform .35s ease-out; }
+body.reduce-motion .modal.gen-complete .pending { opacity: 1; transform: none; }
+@media (max-height: 640px) { .modal.gen-complete .emblem { display: none; } .modal.gen-complete .faith-reveal .big { font-size: 42px; } }
+#montage .beat { font-family: var(--serif); font-size: 1.2rem; }
+#montage .title { font-family: 'IV Pixel', var(--mono); font-weight: 400; font-size: 35px; letter-spacing: 0; color: #ffe9a8; text-shadow: 0 3px 0 #8f5e10, 0 0 22px rgba(255,220,120,.9); animation: bannerIn .9s cubic-bezier(.2, 1.4, .4, 1); }
+#montage .psalm { font-family: var(--serif); font-style: italic; background: rgba(20,12,8,.88); border: 2px solid #f2c860; }
+#montage .psalm span { font-family: var(--mono); font-style: normal; }
+@media (max-width: 359px) { #montage .title { font-size: 28px; } }
+body.reduce-motion #montage .title { animation: none; }
 

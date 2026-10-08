@@ -270,7 +270,84 @@ export class UI {
   showGenerationComplete() {
     const summary = this.state.prestige.summary;
     if (!summary) return;
-    this.openModal(generationCompleteModal(summary, { onBegin: () => this.beginNextGeneration() }));
+    const node = generationCompleteModal(summary, { onBegin: () => this.beginNextGeneration() });
+    this.openModal(node);
+    this.renderer.impactCenter(4, '#fff4c8');
+    this.audio.sfx('fanfare');
+    this.stageReveal(node, summary.breakdown.total);
+  }
+
+  /**
+   * The Generation Complete screen reveals itself in order: the verse, what you did (row by row), then the Faithfulness
+   * counting up and each part that earned it landing with a tick, and only then the button. A tap anywhere skips ahead.
+   */
+  stageReveal(node, total) {
+    const reduce = document.body.classList.contains('reduce-motion');
+    const steps = [];
+    const q = (sel) => [...node.querySelectorAll(sel)];
+    steps.push(...q('p, .verse, h3').filter((e) => !e.closest('.faith-reveal') && !e.classList.contains('note')).map((e) => ({ el: e, wait: 260 })));
+    const dts = q('.stat-grid dt');
+    const dds = q('.stat-grid dd');
+    dts.forEach((dt, i) => steps.push({ el: [dt, dds[i]], wait: 150, tick: true }));
+    steps.push(...q('.people').map((e) => ({ el: e, wait: 300 })));
+    const faith = node.querySelector('.faith-reveal');
+    const big = node.querySelector('.faith-reveal .big');
+    const parts = q('.breakdown span');
+    const note = node.querySelector('p.note');
+    const btns = node.querySelector('.btns');
+    steps.push({ el: faith, wait: 500 });
+    const hide = [...steps.flatMap((s) => [].concat(s.el)), ...parts, note, btns].filter(Boolean);
+    if (reduce) return;
+    for (const e of hide) e.classList.add('pending');
+    big.textContent = '0';
+    let alive = true;
+    const timers = [];
+    const later = (fn, ms) => timers.push(setTimeout(() => alive && fn(), ms));
+    const finish = () => {
+      alive = false;
+      timers.forEach(clearTimeout);
+      for (const e of hide) e.classList.remove('pending');
+      big.textContent = String(total);
+      big.classList.add('landed');
+      node.removeEventListener('pointerdown', finish);
+    };
+    node.addEventListener('pointerdown', finish);
+    let at = 350;
+    for (const s of steps) {
+      later(() => {
+        for (const e of [].concat(s.el)) e.classList.remove('pending');
+        if (s.tick) this.audio.sfx('tick', 0.2);
+      }, at);
+      at += s.wait;
+    }
+    // Faithfulness counts up as each earned part lands
+    let run = 0;
+    const pairs = [];
+    for (let i = 0; i < parts.length; i += 2) pairs.push([parts[i], parts[i + 1]]);
+    for (const [label, val] of pairs) {
+      later(() => {
+        label.classList.remove('pending');
+        val.classList.remove('pending');
+        const v = parseInt(val.textContent.replace('+', ''), 10);
+        if (Number.isFinite(v) && !label.classList.contains('off')) {
+          run += v;
+          big.textContent = String(run);
+          big.classList.remove('landed');
+          void big.offsetWidth;
+          big.classList.add('landed');
+          this.audio.sfx('reward');
+          this.renderer.impactCenter(1, '#ffe9a8');
+        } else this.audio.sfx('tick', 0.1);
+      }, at);
+      at += 520;
+    }
+    later(() => {
+      note?.classList.remove('pending');
+      btns?.classList.remove('pending');
+      big.textContent = String(total);
+      this.audio.sfx('bossWin');
+      node.removeEventListener('pointerdown', finish);
+    }, at + 200);
   }
 
   reviewGenerationOne() {
@@ -1955,6 +2032,9 @@ export class UI {
       m.titleShown = true;
       clear(this.beatBox);
       this.beatBox.append(h('div', { class: 'title', text: NEXT_GENERATION.title }));
+      this.audio.sfx('fanfare');
+      this.renderer.impactCenter(4, '#fff4c8');
+      setTimeout(() => this.renderer.impactCenter(3, '#ffe9a8'), 900);
     }
   }
 

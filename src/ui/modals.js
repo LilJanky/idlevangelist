@@ -82,7 +82,8 @@ export function generationCompleteModal(summary, { onBegin, reviewOnly = false, 
   const parts = summary.breakdown.parts.filter((p) => p.earned || p.id !== 'conversions');
   return h(
     'div',
-    { class: 'modal', role: 'dialog', 'aria-label': GEN_COMPLETE.title },
+    { class: `modal gen-complete${reviewOnly ? '' : ' staged'}`, role: 'dialog', 'aria-label': GEN_COMPLETE.title },
+    h('div', { class: 'emblem' }),
     h('h2', { text: GEN_COMPLETE.title }),
     h('p', { text: GEN_COMPLETE.blurb }),
     h('div', { class: 'verse' }, GEN_COMPLETE.verse.text, h('span', { text: `${GEN_COMPLETE.verse.ref} · ESV` })),

@@ -97,7 +97,7 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
   await page.waitForTimeout(250); await check('professor hit');
   await page.evaluate(() => { window.__idlevangelist.game.failBoss(); window.__idlevangelist.game.endBossSession(); });
   await page.evaluate(() => { const { game } = window.__idlevangelist; game.state.gen.bossState.status = 'available'; game.challengeBoss(); game.boss.stage = 'victory'; game.finishBossVictory(); });
-  await page.waitForTimeout(2000); await check('generation complete');
+  await page.waitForTimeout(2000); await page.locator('#overlay .modal').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(600); await check('generation complete');
   await browser.close();
 }
 const uniq = [...new Set(problems)];
