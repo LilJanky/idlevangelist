@@ -647,3 +647,29 @@ body.reduce-motion .floater.engage.crit, body.reduce-motion .floater.chain, body
 .modal.intro .btn { min-height: 52px; font-size: 14px; }
 body:not(.reduce-motion) .modal.intro .btn.gold { animation: beginPulse 1.6s ease-in-out infinite; }
 @keyframes beginPulse { 50% { filter: brightness(1.15); } }
+
+/* ---- Interface polish 2: ministry and upgrade cards ---- */
+.passive-summary { padding: 10px 12px; background: #1c2333; border: 2px solid #0a0b10; box-shadow: inset 0 0 0 1px #3a4766, inset 0 3px 0 rgba(255,255,255,.05); }
+.passive-summary .ps-top { align-items: center; }
+.passive-summary .ps-total, .row .prod { font-family: var(--mono); }
+.passive-summary .ps-total b, .row .prod b { font-family: 'IV Pixel', var(--mono); font-weight: 400; font-synthesis: none; letter-spacing: 0; }
+.passive-summary .ps-total b { font-size: 28px; line-height: 1; }
+.passive-summary .ps-total small, .row .prod small { font-size: .65rem; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-left: 2px; }
+.ps-bar { height: 10px; box-shadow: inset 0 2px 0 rgba(0,0,0,.45); }
+.row { position: relative; border: 2px solid #0a0b10; border-left-width: 6px; border-left-color: var(--stripe, #44506c); background: #20273a; box-shadow: inset 0 0 0 1px #343f5a, inset 0 2px 0 rgba(255,255,255,.05); padding: 9px 10px; }
+.row .name { font-size: 14px; }
+.row .prod b { font-size: 14px; color: var(--gold); }
+.row .ico { flex-basis: 34px; align-self: flex-start; padding-top: 2px; }
+.row.min-row { --stripe: var(--c); }
+.row.up-row { --stripe: #4a5472; }
+.row.up-row.tag-active { --stripe: #e0b84e; }
+.row.up-row.tag-scripture { --stripe: #6ea4e0; }
+.row.up-row.tag-ministry { --stripe: #5fc08a; }
+.row.up-row.tag-supplies { --stripe: #46aaa6; }
+.row.up-row.tag-professor { --stripe: #cf7e7e; }
+.row.up-row:not(.can) { opacity: .82; }
+.row.up-row.can { background: #232c42; box-shadow: inset 0 0 0 1px var(--stripe), inset 0 2px 0 rgba(255,255,255,.06); }
+.row.up-row .chip { white-space: nowrap; border: 0; background: color-mix(in srgb, var(--stripe) 28%, #12151e); color: color-mix(in srgb, var(--stripe) 70%, #fff); padding: 2px 6px; }
+.row.up-row .chip.best { background: var(--gold); color: #231a06; font-weight: 800; }
+.row .buy { min-width: 92px; }
+.row .buy small { font-size: .7rem; font-weight: 700; }

@@ -20,6 +20,15 @@ import {
 const FLOATER_POOL = 24;
 const MINISTRY_COLORS = { tracts: '#e6d9b0', bibles: '#c9a24a', streetTeam: '#e0913a', bibleStudy: '#6a8ac0', discipleship: '#7fd0bc' };
 
+/** A big pixel-font number with its unit in small body text, so long labels never crowd the pixel font. */
+function setRate(el, num, unit) {
+  const key = `${num}|${unit}`;
+  if (el.dataset.rate === key && el.firstChild?.tagName === 'B') return;
+  el.dataset.rate = key;
+  el.textContent = '';
+  el.append(h('b', { text: num }), h('small', { text: ` ${unit}` }));
+}
+
 export class UI {
   constructor({ game, renderer, audio, hooks, debugFactory = null }) {
     this.game = game;
@@ -1453,7 +1462,7 @@ export class UI {
       const label = h('span', {});
       const cost = h('small', {});
       const buy = h('button', { class: 'buy', type: 'button', 'aria-label': `Buy ${def.name}`, on: { click: () => this.buyMinistry(id) } }, label, cost);
-      const root = h('div', { class: 'row' }, h('div', { class: 'ico' }, icon(def.icon, 26)), h('div', { class: 'info' }, h('div', { class: 'name' }, nameEl, ownedEl, tickEl), prodEl, perf, next, desc), buy);
+      const root = h('div', { class: 'row min-row', style: `--c:${MINISTRY_COLORS[id]}` }, h('div', { class: 'ico' }, icon(def.icon, 26)), h('div', { class: 'info' }, h('div', { class: 'name' }, nameEl, ownedEl, tickEl), prodEl, perf, next, desc), buy);
       this.mRows[id] = { root, nameEl, ownedEl, tickEl, prodEl, desc, perf, next, buy, label, cost };
       this.mList.append(root);
     }
@@ -1482,7 +1491,7 @@ export class UI {
     const gen = this.state.gen;
     let lockedShown = false;
     const total = game.baseSeedsPerSec;
-    setText(this.psTotal, `${formatRate(total)} Seeds/sec`);
+    setRate(this.psTotal, formatRate(total), 'Seeds/sec');
     const sumSig = MINISTRY_ORDER.map((id) => Math.round(game.ministryInfo(id).production * 10)).join(',');
     if (force || this.sigs.sum !== sumSig) {
       this.sigs.sum = sumSig;
@@ -1518,7 +1527,8 @@ export class UI {
       row.root.classList.remove('locked');
       setText(row.nameEl, MINISTRIES[id].name);
       setText(row.ownedEl, `\u00d7${info.owned}`);
-      setText(row.prodEl, info.owned > 0 ? `${formatRate(info.production)} Seeds/sec` : 'Not started yet');
+      if (info.owned > 0) setRate(row.prodEl, formatRate(info.production), 'Seeds/sec');
+      else setText(row.prodEl, 'Not started yet');
       setText(row.desc, info.owned > 0 ? '' : MINISTRIES[id].blurb);
       const nextMs = BALANCE.ministryMilestones.find((m) => info.owned < m.owned);
       const visual = BALANCE.visualMilestones.find((m) => info.owned < m);
@@ -1606,7 +1616,7 @@ export class UI {
       eta = h('div', { class: 'eta' });
       this.etaEls.push({ el: eta, id });
     }
-    return h('div', { class: `row${fork ? ' in-fork' : ''}` },
+    return h('div', { class: `row up-row tag-${def.tag}${afford ? ' can' : ''}${fork ? ' in-fork' : ''}` },
       h('div', { class: 'info' },
         h('div', { class: 'name' }, text.name, ' ',
           h('span', { class: `chip ${funds ? 'funds' : ''}`, text: UPGRADE_TAG_LABEL[def.tag] }),

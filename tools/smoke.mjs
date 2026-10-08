@@ -180,7 +180,7 @@ try {
       await page.locator('.nav-btn[data-tab=ministry]').click();
       await page.waitForTimeout(500);
       const text = await page.locator('#tab-ministry').innerText();
-      check(/Seeds\/sec/.test(text) && /→/.test(text), 'Ministry tab shows production numbers and before/after previews');
+      check(/Seeds\/sec/i.test(text) && /→/.test(text), 'Ministry tab shows production numbers and before/after previews');
       await page.locator('.nav-btn[data-tab=street]').click();
 
       // The Professor: argument -> crowd window -> argument ... -> victory
