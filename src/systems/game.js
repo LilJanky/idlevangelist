@@ -868,11 +868,6 @@ export class Game {
     return result;
   }
 
-  /** A tap on the street that found no one open to a moment. */
-  missTap() {
-    return this.street.miss();
-  }
-
   /** Keyboard/assist: engage the most central open moment. */
   engageNearest() {
     let best = null;

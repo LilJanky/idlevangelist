@@ -1088,7 +1088,6 @@ export const HINTS = {
   leaving: 'Holding the Word for a bigger street? People whose moment is passing show a short bar over them: when it runs out, they are gone.',
   crest: 'The street is at its fullest and starting to thin. Proclaim now, and it carries further.',
   chain: 'Every fifth successive tap pays a chain bonus. Keep the run going.',
-  miss: 'Tapping where no one has a bubble breaks your run a little. Keep your taps on people with a speech bubble.',
   streakBar: 'The bar under Active Witness is how long your run lasts without another engagement. The hotter the run, the shorter it is.',
   crowdEvent: 'Gatherings differ: a crowd all at once is the moment for a held proclamation; a steady stream is the moment to tap.',
   ministryTick: 'Each ministry reports what it produced every few seconds. Watch the street: tables, helpers and gatherings grow as you invest.',

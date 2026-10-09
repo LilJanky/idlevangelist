@@ -38,10 +38,9 @@ export const BALANCE = {
     streakDecayPerSecond: 1.5,
     streakDrainFraction: 0.12, // once it fades, a long run drains faster: max(streakDecayPerSecond, run x this) per second
     // Tapping where no one is open to a moment (once the run is worth protecting) costs part of it, so a run is kept by being on target.
-    missPenalty: { from: 4, fraction: 0.2, min: 2, gap: 0.3 },
     conversationStreakBonus: 2,
     minEngageGap: 0.08, // anti-macro guard (seconds)
-    hitRadiusPx: 34,
+    hitRadiusPx: 42,
     momentum: {
       max: 100,
       perEngage: 1.6,

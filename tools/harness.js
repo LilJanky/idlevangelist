@@ -261,10 +261,7 @@ export function createBot(profileName = 'hybrid', seed = 'sim-1', { balance = BA
     bot.tapAcc = Math.min(2, bot.tapAcc + rate * step);
     while (bot.tapAcc >= 1) {
       bot.tapAcc -= 1;
-      if (rng() > profile.accuracy) {
-        game.missTap();
-        continue;
-      }
+      if (rng() > profile.accuracy) continue; // a tap that found no one: free, but nothing gained
       const pool = game.crowd.openPeds();
       if (pool.length) game.engageCrowd(pool[Math.floor(rng() * pool.length)].id);
     }

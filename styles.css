@@ -399,7 +399,6 @@ body.reduce-motion #btn-word.tick, body.reduce-motion #btn-word.pulse { animatio
 @media (max-width: 360px) { .floater.wordtotal { font-size: 19px; } .floater.wordtotal.big { font-size: 22px; } }
 .floater.wordhit { color: #ffe9a8; font-size: 15px; }
 .floater.engage.crit { font-size: 24px; color: #fff4c8; letter-spacing: .04em; text-shadow: 0 0 12px rgba(255, 214, 120, .95), 0 2px 0 #000; animation-duration: 1.15s; }
-.floater.miss { color: #ff8a7a; font-size: 14px; letter-spacing: .04em; }
 .floater.streakdown { color: #ffb08a; font-size: 12px; letter-spacing: .06em; }
 .floater.wordhit.bystander { font-size: 11px; color: #cdbf95; font-weight: 700; }
 .floater.harvest { color: #b6f0a0; font-size: 17px; letter-spacing: .03em; }
@@ -584,7 +583,7 @@ body.reduce-motion .floater.engage.crit, body.reduce-motion .floater.chain, body
 
 /* the pixel font, always at multiples of 7px so every font pixel is a whole number of screen pixels */
 .stat-value, .sh-streak b, .passive-summary .ps-total, .row .prod, #word-slam .ws-mult, #word-slam .ws-total, .modal h2,
-.floater.engage, .floater.wordtotal, .floater.wordhit, .floater.chain, .floater.harvest, .floater.miss, .floater.streakdown, .floater.minitick,
+.floater.engage, .floater.wordtotal, .floater.wordhit, .floater.chain, .floater.harvest, .floater.streakdown, .floater.minitick,
 .floater.crit, .ps-total {
   font-family: 'IV Pixel', var(--mono); font-weight: 400; font-synthesis: none; letter-spacing: 0; text-transform: none;
 }
@@ -593,7 +592,7 @@ body.reduce-motion .floater.engage.crit, body.reduce-motion .floater.chain, body
 .passive-summary .ps-total { font-size: 21px; line-height: 1; }
 .row .prod { font-size: 14px; }
 .sh-streak b { font-size: 21px; font-size: round(down, calc(14px + 14px * var(--k)), 7px); transition: none; }
-.floater.engage, .floater.chain, .floater.harvest, .floater.miss, .floater.streakdown, .floater.minitick { font-size: 14px; }
+.floater.engage, .floater.chain, .floater.harvest, .floater.streakdown, .floater.minitick { font-size: 14px; }
 .floater.engage.crit { font-size: 28px; }
 .floater.wordtotal { font-size: 28px; }
 .floater.wordtotal.big { font-size: 35px; }

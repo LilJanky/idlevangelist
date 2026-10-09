@@ -102,24 +102,6 @@ export class StreetSystem {
     st.word = Math.min(b.max, st.word + amount * (this.standFirm && !steady ? b.standFirmMult : 1) * (1 + this.game.mods.wordCharge));
   }
 
-  /** A tap that found no one open: part of a run worth protecting is lost. Returns what was lost, or null. */
-  miss() {
-    const g = this.game;
-    const cfg = this.balance.missPenalty;
-    if (g.state.phase !== 'gen1' || g.streetPaused) return null;
-    if (g.time - this.lastEngageAt < cfg.gap || g.time - (this.lastMissAt ?? -10) < cfg.gap) return null; // a double tap or a slip of the thumb is one miss at most
-    const count = this.streakCount;
-    if (count < cfg.from) return null;
-    this.lastMissAt = g.time;
-    const before = this.tier;
-    const lost = Math.min(count, Math.max(cfg.min, Math.ceil(count * cfg.fraction)));
-    this.st.streak = Math.max(0, this.st.streak - lost);
-    g.emit('miss', { lost, count: this.streakCount });
-    g.hint('miss');
-    if (this.tier < before) g.emit('streakDown', { from: before, to: this.tier, mult: this.multiplier, lost, why: 'miss' });
-    return { lost };
-  }
-
   addStreak(n) {
     const st = this.st;
     const before = this.tier;

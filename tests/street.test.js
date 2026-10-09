@@ -517,35 +517,14 @@ test('streak criteria: a long idle gap drains a run proportionally and announces
   assert.ok(events.some(([n, d]) => n === 'streakDown' && d.why === 'pace'));
 });
 
-test('streak criteria: tapping empty street costs a slice of a run, never a small run, and a double tap is one miss', () => {
+test('streak criteria: tapping empty street is free: it never costs part of a run', () => {
   const game = newGame('miss1');
   quiet(game);
   const st = game.state.gen.street;
-  st.streak = 3;
-  st.idle = 0;
-  game.advance(1);
-  assert.equal(game.missTap(), null);
-  assert.equal(Math.floor(st.streak), 3, 'runs under the threshold are safe');
   st.streak = 20;
   st.idle = 0;
   game.advance(1);
-  game.missTap();
-  const cfg = BALANCE.street.missPenalty;
-  const lost = Math.max(cfg.min, Math.ceil(20 * cfg.fraction));
-  assert.ok(Math.abs(st.streak - (20 - lost)) < 0.2, `${st.streak}`);
-  const after = st.streak;
-  game.missTap();
-  assert.equal(st.streak, after, 'a second tap inside the gap does nothing');
-});
-
-test('streak criteria: a miss while a conversation holds the street costs nothing', () => {
-  const game = newGame('miss2');
-  quiet(game);
-  game.state.gen.street.streak = 20;
-  game.advance(1);
-  const meet = meetSomeone(game);
-  assert.ok(meet);
-  const before = game.state.gen.street.streak;
-  game.missTap();
-  assert.equal(game.state.gen.street.streak, before);
+  const before = st.streak;
+  assert.equal(typeof game.missTap, 'undefined', 'there is no miss mechanic');
+  assert.ok(Math.abs(st.streak - before) < 1e-9);
 });

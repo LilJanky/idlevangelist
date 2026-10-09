@@ -401,10 +401,7 @@ export class UI {
       return;
     }
     const id = this.renderer.hitPed(e.clientX, e.clientY, BALANCE.street.hitRadiusPx);
-    if (id === null) {
-      game.missTap();
-      return;
-    }
+    if (id === null) return; // tapping elsewhere is free
     game.engageCrowd(id);
   }
 
@@ -809,13 +806,6 @@ export class UI {
           this.pulse(this.els.shStreak, 'drop');
           this.audio.sfx('drop');
           this.floater(`\u25bc ACTIVE WITNESS \u00d7${d.mult.toFixed(1)}`, 'streakdown', 90, 40);
-          break;
-        case 'miss':
-          this.floater(`MISS \u2212${d.lost}`, 'miss', this.lastTap.x, this.lastTap.y - 14);
-          this.audio.sfx('miss');
-          this.els.shStreak.classList.remove('drop');
-          void this.els.shStreak.offsetWidth;
-          this.els.shStreak.classList.add('drop');
           break;
         case 'bossRebuttal':
           this.audio.sfx('special');

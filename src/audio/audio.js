@@ -214,9 +214,6 @@ export class AudioSystem {
         this.tone(NOTE(67), t, 0.1, 'triangle', 0.07);
         this.tone(NOTE(60), t + 0.09, 0.2, 'triangle', 0.07);
         break;
-      case 'miss':
-        this.tone(NOTE(46), t, 0.12, 'sine', 0.08, this.sfxBus, 0.005);
-        break;
       case 'word':
         this.tone(NOTE(76), t, 0.4, 'sine', 0.1, this.sfxBus, 0.01);
         this.tone(NOTE(83), t + 0.06, 0.5, 'sine', 0.07);
