@@ -236,6 +236,7 @@ export const BALANCE = {
 
   crowd: {
     cap: 14,
+    maxCapBonus: 3, // how many more people the street can hold by the end of a run (see Game.crowdCapBonus)
     spawnInterval: [0.55, 1.1],
     speed: [10, 20], // % of scene width per second x 0.01 (normalized units/sec * 100)
     gatherCapBonus: 2,

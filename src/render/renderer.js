@@ -831,11 +831,10 @@ export class Renderer {
   ministryArt(id, own) {
     const feet = this.feetY;
     const gt = this.groundTop;
-    const workers = visualCounts(own.streetTeam || 0).workers;
     switch (id) {
       case 'tracts': return { x: 11, y: feet - 16 };
       case 'bibles': return { x: 22, y: feet - 17 };
-      case 'streetTeam': return { x: 54 + Math.max(0, workers - 1) * 4.5, y: gt - 6 };
+      case 'streetTeam': return { x: this.slots?.tables?.[0]?.x ?? 56, y: gt + 6 };
       case 'bibleStudy': return { x: 23, y: gt - 10 };
       case 'discipleship': return { x: this.W - 44, y: gt - 22 };
       default: return { x: 30, y: feet - 20 };
@@ -874,20 +873,24 @@ export class Renderer {
       if (wp.youngX !== null) this.queue(feet - 3, 'young', wp);
     }
 
-    // ministry made visible: every major ministry has a presence that grows at visual milestones
-    const own = wp.preview ? state.prestige.legacy.ministries || {} : Object.fromEntries(Object.entries(gen.ministries).map(([k, v]) => [k, v.owned]));
-    const believers = wp.preview || this.montage ? state.prestige.legacy.disciples || [] : gen.disciples.filter((d) => d.status === 'trained').map((d) => d.id);
+    // ministry made visible: tables, props and places that grow at visual milestones. Only the people you TRAIN (and those who came to
+    // Christ) appear as people: they staff the street team's tables across the street. Next to a new generation nothing but a
+    // first table and one disciple carries over: the rest has to be built again.
+    const carry = wp.preview || this.montage;
+    const ownRaw = carry ? state.prestige.legacy.ministries || {} : Object.fromEntries(Object.entries(gen.ministries).map(([k, v]) => [k, v.owned]));
+    const own = carry ? Object.fromEntries(Object.entries(ownRaw).map(([k, v]) => [k, v > 0 ? 1 : 0])) : ownRaw;
+    const believers = carry ? (state.prestige.legacy.disciples || []).slice(0, 1) : gen.disciples.filter((d) => d.status === 'trained').map((d) => d.id);
     this.queue(feet + 20, 'props', own, wp);
     if (state.phase === 'gen1') {
       this.queue(feet + 21, 'supplies', gen.upgrades, 'front');
       this.queue(groundTop - 2, 'supplies', gen.upgrades, 'back'); // the van is parked behind the crowd
     }
-    // The ministry's people live on the FAR side of the street, in front of the shopfronts, so the near pavement stays clear for tapping.
-    const workers = visualCounts(own.streetTeam || 0).workers;
-    const converts = state.phase === 'gen1' ? gen.conversionState.converts.slice(0, 5) : [];
-    const slots = this.helperSlots(workers, believers.length, converts.length);
+    // The ministry lives on the FAR side of the street, in front of the shopfronts, so the near pavement stays clear for tapping.
+    const tables = visualCounts(own.streetTeam || 0).tables;
+    const converts = state.phase === 'gen1' ? gen.conversionState.converts.slice(0, 3) : [];
+    const slots = this.helperSlots(tables, believers.length, converts.length);
     this.slots = slots;
-    slots.workers.forEach((sl, i) => this.queue(sl.y + 0.1 * i, 'worker', i, sl));
+    slots.tables.forEach((sl, i) => this.queue(sl.y + 0.2, 'table', i, sl));
     believers.forEach((id, i) => this.queue(slots.believers[i].y + 0.1 * i, 'believer', id, slots.believers[i]));
     converts.forEach((c, i) => this.queue(slots.converts[i].y + 0.1 * i, 'convert', c.name, { slot: slots.converts[i], wp }));
     const study = visualCounts(own.bibleStudy || 0);
@@ -912,7 +915,7 @@ export class Renderer {
         case 'young': this.drawYoung(ctx, wp, t, feet); break;
         case 'props': this.drawProps(ctx, it.ref, wp, feet, t); break;
         case 'supplies': this.drawSupplies(ctx, it.ref, t, it.extra); break;
-        case 'worker': this.drawWorker(ctx, it.ref, it.extra, wp, t); break;
+        case 'table': this.drawTeamTable(ctx, it.ref, it.extra, wp, t); break;
         case 'believer': this.drawBeliever(ctx, it.ref, it.extra, wp, t); break;
         case 'convert': this.drawConvert(ctx, it.ref, it.extra.slot, it.extra.wp, t); break;
         case 'study': this.drawStudy(ctx, it.ref, wp, t, groundTop); break;
@@ -1328,36 +1331,45 @@ export class Renderer {
     }
   }
 
-  /** Where the ministry's own people stand: a row along the far side of the street, shared out across the width. */
-  helperSlots(nw, nb, nc) {
-    const start = 54;
+  /**
+   * Where the ministry's tables and the people who staff them go: a row along the far side of the street. Each street-team investment
+   * tier adds a table; trained disciples stand behind them; converts stand just past the last table.
+   */
+  helperSlots(nt, nb, nc) {
+    const start = 44;
     const end = this.W - 8;
-    const gap = Math.min(9, (end - start) / Math.max(1, nw + nb + nc));
-    const y = this.groundTop + 16;
-    let k = 0;
-    const take = (n) => Array.from({ length: n }, (_, i) => ({ x: Math.round(start + gap * k++), y: y + (i % 2) * 2, i }));
-    return { workers: take(nw), believers: take(nb), converts: take(nc) };
+    const n = Math.max(nt, nb);
+    const gap = Math.max(11, Math.min(16, (end - start - nc * 8) / Math.max(1, n)));
+    const y = this.groundTop + 18;
+    const tables = Array.from({ length: nt }, (_, k) => ({ x: Math.round(start + gap * (k + 0.5)), y, i: k }));
+    const believers = Array.from({ length: nb }, (_, k) => ({ x: Math.round(start + gap * (k + 0.5)), y: y - 3, i: k }));
+    const converts = Array.from({ length: nc }, (_, k) => ({ x: Math.min(end, Math.round(start + gap * n + 4 + 8 * k)), y: y - 1 + (k % 2) * 2, i: k }));
+    return { tables, believers, converts };
   }
 
-  /** A street-team worker: stands on the far side of the street and periodically hands out a tract. */
-  drawWorker(ctx, i, slot, wp, t) {
+  /** A street-team table across the street: wood top, a coloured cloth with a small cross, and tracts laid out. */
+  drawTeamTable(ctx, k, slot, wp, t) {
+    const R = wp.restoration;
     const x = slot.x;
     const y = slot.y;
-    const look = lookFromInt(9000 + i * 7919);
-    look.accessory = 'none';
-    look.top = '#c9822f';
-    const cycle = this.reducedMotion ? 9 : (t * 0.7 + i * 1.9) % 4.2;
-    const giving = cycle < 0.7;
-    drawShadow(ctx, x, y, 8, 0.2);
-    this.drawStreetReflection(ctx, x, y, 1, { look, dir: 1, dim: Math.max(0, 0.06 - wp.restoration * 0.06), fog: FOG, pose: giving ? 'proclaim' : 'idle', frame: this.idleFrame(t, i * 0.29), bob: !giving && Math.sin(t * 1.5 + i) > 0.8 ? 1 : 0, time: t }, wp, 0.66);
-    drawPerson(ctx, x, y, 1, { look, dir: 1, dim: Math.max(0, 0.06 - wp.restoration * 0.06), fog: FOG, pose: giving ? 'proclaim' : 'idle', frame: this.idleFrame(t, i * 0.29), bob: !giving && Math.sin(t * 1.5 + i) > 0.8 ? 1 : 0, time: t });
-    if (giving) {
-      ctx.fillStyle = '#f4eed8';
-      ctx.fillRect(Math.round(x + 5 + (cycle / 0.7) * 9), y - 12, 3, 2);
-    } else {
-      ctx.fillStyle = '#f4eed8';
-      ctx.fillRect(x + 4, y - 9, 2, 3);
+    const cloth = ['#c9822f', '#4a8aa8', '#7a9a4a', '#b0485a'][k % 4];
+    drawShadow(ctx, x, y, 12, 0.2);
+    ctx.fillStyle = '#2a2018';
+    ctx.fillRect(x - 5, y - 3, 1, 3);
+    ctx.fillRect(x + 4, y - 3, 1, 3);
+    ctx.fillStyle = cloth;
+    ctx.fillRect(x - 6, y - 7, 12, 4);
+    ctx.fillStyle = mix('#5a4636', '#8a6a46', R);
+    ctx.fillRect(x - 7, y - 8, 14, 2);
+    ctx.fillStyle = '#f4eed8';
+    ctx.fillRect(x, y - 6, 1, 3);
+    ctx.fillRect(x - 1, y - 5, 3, 1);
+    const paper = ['#f4eed8', '#e8e0c8', '#e6d9b0'];
+    for (let j = 0; j < 3; j++) {
+      ctx.fillStyle = paper[j];
+      ctx.fillRect(x - 5 + j * 4, y - 11, 3, 3);
     }
+    void t;
   }
 
   drawBeliever(ctx, id, slot, wp, t) {
@@ -1404,7 +1416,7 @@ export class Renderer {
     const x0 = 6;
     const y = groundTop + 11;
     const count = v.studyAttendees;
-    const width = 14 + count * 5;
+    const width = 16 + count * 3;
     // a warm lamp and bench: the Bible study indicator; it becomes more established at milestones
     ctx.fillStyle = 'rgba(255,214,130,0.16)';
     ctx.fillRect(x0 - 2, y - 24, width + 6, 24);
@@ -1420,14 +1432,13 @@ export class Renderer {
       ctx.fillRect(x0, y - 24, 1, 20);
       ctx.fillRect(x0 + width - 1, y - 24, 1, 20);
     }
+    // open Bibles and a notebook on the bench: the study is a place, and its people are the disciples you train
     for (let i = 0; i < count; i++) {
-      const look = lookFromInt(5500 + i * 3571);
-      look.accessory = 'none';
-      const x = x0 + 5 + i * 5.5;
-      this.drawStreetReflection(ctx, Math.round(x), y - 3, 1, { look, dir: i % 2 ? -1 : 1, dim: 0.04, fog: FOG, pose: 'idle', frame: this.idleFrame(t, i * 0.41), bob: !this.reducedMotion && Math.sin(t * 0.8 + i * 2) > 0.92 ? 1 : 0, time: t }, wp, 0.54);
-      drawPerson(ctx, Math.round(x), y - 3, 1, { look, dir: i % 2 ? -1 : 1, dim: 0.04, fog: FOG, pose: 'idle', frame: this.idleFrame(t, i * 0.41), bob: !this.reducedMotion && Math.sin(t * 0.8 + i * 2) > 0.92 ? 1 : 0, time: t });
-      ctx.fillStyle = '#f2ead0';
-      ctx.fillRect(Math.round(x) - 1, y - 9, 3, 2);
+      const bx = x0 + 3 + i * 3;
+      ctx.fillStyle = i % 3 === 0 ? '#c9b48a' : '#f2ead0';
+      ctx.fillRect(bx, y - 6, 2, 2);
+      ctx.fillStyle = '#7a4a24';
+      ctx.fillRect(bx, y - 4, 2, 1);
     }
     const flick = this.reducedMotion ? 0 : Math.sin(t * 5) > 0 ? 1 : 0;
     ctx.fillStyle = flick ? '#ffe9a0' : '#ffd070';
@@ -1462,13 +1473,14 @@ export class Renderer {
       ctx.fillStyle = '#5c8a62';
       ctx.fillRect(x0 + 1, y - 22, 36, 3);
     }
+    // strung lights under the banner: one more for each step the gathering grows
     for (let i = 0; i < count; i++) {
-      const look = lookFromInt(7700 + i * 2113);
-      look.accessory = 'none';
-      const x = x0 + 4 + i * 5;
-      const bob = this.reducedMotion ? 0 : Math.sin(t + i * 1.7) > 0.85 ? 1 : 0;
-      this.drawStreetReflection(ctx, x, y - (i % 2) * 2, 1, { look, dir: i < count / 2 ? 1 : -1, dim: 0.06, fog: FOG, bob, frame: this.idleFrame(t, i * 0.31), time: t }, wp, 0.56);
-      drawPerson(ctx, x, y - (i % 2) * 2, 1, { look, dir: i < count / 2 ? 1 : -1, dim: 0.06, fog: FOG, bob, frame: this.idleFrame(t, i * 0.31), time: t });
+      const lx = x0 + 3 + i * 5;
+      const on = this.reducedMotion || Math.sin(t * 2 + i) > -0.6;
+      ctx.fillStyle = '#2a2018';
+      ctx.fillRect(lx, y - 20, 1, 2);
+      ctx.fillStyle = on ? '#ffe9a0' : '#c9a24a';
+      ctx.fillRect(lx - 1, y - 18, 3, 3);
     }
     void wp;
   }

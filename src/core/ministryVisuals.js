@@ -21,7 +21,7 @@ export function crossedMilestone(before, after, milestones = BALANCE.visualMiles
 const BY_TIER = {
   tractStacks: [0, 1, 2, 3, 4], // table piles -> rack -> second table
   bibleStacks: [0, 1, 2, 3, 4], // single stack -> more stacks -> crates -> distribution display
-  workers: [0, 1, 2, 3, 4], // street-team members working the crowd
+  tables: [0, 1, 2, 3, 4], // street-team tables set up across the street (each investment tier adds one)
   studyAttendees: [0, 2, 3, 4, 6], // seated at the Bible-study bench
   gatherers: [0, 2, 3, 5, 7], // the discipleship gathering
 };

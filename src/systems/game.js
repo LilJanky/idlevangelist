@@ -149,6 +149,13 @@ export class Game {
     return Math.min(cfg.buzzMaxBonus, ((this.state.gen.bossState.buzz || 0) / cfg.buzzTarget) * cfg.buzzMaxBonus);
   }
 
+  /** The street fills up slowly over the run (one more person at about 50K, 500K and 5M Seeds planted), never into a wall. */
+  get crowdCapBonus() {
+    const total = this.state.gen.totalSeeds;
+    if (!(total >= 50000)) return 0;
+    return Math.min(this.balance.crowd.maxCapBonus, Math.floor(Math.log10(total / 5000)));
+  }
+
   get inBoss() {
     return !!this.boss;
   }
@@ -188,7 +195,7 @@ export class Game {
     this.crowd.update(dt, {
       gather: !!this.boss && this.boss.stage !== 'passed',
       speedScale: conversionSlow * (gameplay && this.wordReady ? this.balance.street.word.readyPaceMult : 1),
-      capBonus: Math.min(6, Math.floor(gen.totalSeeds / 6000)),
+      capBonus: this.crowdCapBonus,
       oppMult: gameplay ? this.street.opportunityMult : 1,
       oppDecay: gameplay && this.wordReady ? this.balance.street.word.readyHoldMult : 1,
       lifeAdd: gameplay ? this.mods.oppLifeAdd : 0,
@@ -619,7 +626,7 @@ export class Game {
     const friends = shape.shape === 'friends';
     const count = friends ? shape.size[0] : Math.max(1, Math.round(rangeFrom(this.rng, shape.size)) + (lecture ? cfg.foreshadowBonus : 0) + mods.eventSize);
     const life = [(shape.life?.[0] ?? 0) + mods.eventLife, (shape.life?.[1] ?? 0) + mods.eventLife];
-    const capBonus = Math.min(6, Math.floor(gen.totalSeeds / 6000));
+    const capBonus = this.crowdCapBonus;
     let arrived = { count: 0, side: 'left' };
     switch (shape.shape) {
       case 'pack':

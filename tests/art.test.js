@@ -34,9 +34,9 @@ test('the ministry\'s own people stand on the far side of the street, out of the
   const r = Object.create(Renderer.prototype);
   r.W = 130;
   r.H = 180;
-  const slots = r.helperSlots(6, 4, 5);
+  const slots = r.helperSlots(4, 4, 3);
   const lanes = r.laneYs(r.groundTop);
-  for (const s of [...slots.workers, ...slots.believers, ...slots.converts]) {
+  for (const s of [...slots.tables, ...slots.believers, ...slots.converts]) {
     assert.ok(s.y < lanes[0] - 6, `helper at ${s.y} is behind the nearest lane (${lanes[0]})`);
     assert.ok(s.x >= 40 && s.x <= r.W, `helper x ${s.x} is on the street`);
   }

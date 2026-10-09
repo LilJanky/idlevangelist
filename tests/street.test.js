@@ -286,10 +286,10 @@ test('ministry visual milestones follow ownership (1 / 5 / 10 / 25)', () => {
   assert.deepEqual(BALANCE.visualMilestones, [1, 5, 10, 25]);
   const tiers = [0, 1, 4, 5, 9, 10, 24, 25, 80].map((n) => visualTier(n));
   assert.deepEqual(tiers, [0, 1, 1, 2, 2, 3, 3, 4, 4]);
-  assert.equal(visualCounts(0).workers, 0);
-  assert.equal(visualCounts(1).workers, 1);
-  assert.equal(visualCounts(10).workers, 3);
-  assert.equal(visualCounts(25).workers, 4);
+  assert.equal(visualCounts(0).tables, 0);
+  assert.equal(visualCounts(1).tables, 1);
+  assert.equal(visualCounts(10).tables, 3);
+  assert.equal(visualCounts(25).tables, 4);
   assert.equal(visualCounts(5).tractStacks, 2);
   assert.equal(visualCounts(25).bibleStacks, 4);
   assert.ok(visualCounts(25).studyAttendees > visualCounts(1).studyAttendees);
