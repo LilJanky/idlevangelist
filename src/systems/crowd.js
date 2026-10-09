@@ -281,7 +281,13 @@ export class CrowdSystem {
   /** A walker who would run into someone standing still ahead of them steps into a free lane and keeps going. */
   sidestep(p) {
     const gap = this.balance.crowd.queueGap;
-    const blocked = (lane) => this.peds.some((q) => q !== p && q.lane === lane && !q.far && (q.hold || q.standing) && (q.x - p.x) * p.dir > -0.02 && (q.x - p.x) * p.dir < gap);
+    // blocked by someone standing, or by a clearly slower walker just ahead in the same direction
+    const blocked = (lane) => this.peds.some((q) => {
+      if (q === p || q.lane !== lane || q.far) return false;
+      const ahead = (q.x - p.x) * p.dir;
+      if (q.hold || q.standing) return ahead > -0.02 && ahead < gap;
+      return q.dir === p.dir && ahead > 0 && ahead < gap && q.speed < p.speed * 0.75;
+    });
     if (!blocked(p.lane)) return;
     const clear = (lane) => !blocked(lane) && !this.peds.some((q) => q !== p && q.lane === lane && !q.far && Math.abs(q.x - p.x) < gap * 0.7);
     for (const lane of [p.lane - 1, p.lane + 1]) {

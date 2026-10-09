@@ -191,7 +191,7 @@ export class Game {
     const gameplay = state.phase === 'gen1';
     const paused = this.streetPaused;
 
-    const conversionSlow = this.enc?.state === 'conversion' ? 0.22 : 1;
+    const conversionSlow = this.enc?.state === 'conversion' ? 0.6 : 1; // the street eases, it never crawls
     this.crowd.update(dt, {
       gather: !!this.boss && this.boss.stage !== 'passed',
       speedScale: conversionSlow * (gameplay && this.wordReady ? this.balance.street.word.readyPaceMult : 1),
