@@ -879,7 +879,7 @@ export class Renderer {
     const carry = wp.preview || this.montage;
     const ownRaw = carry ? state.prestige.legacy.ministries || {} : Object.fromEntries(Object.entries(gen.ministries).map(([k, v]) => [k, v.owned]));
     const own = carry ? Object.fromEntries(Object.entries(ownRaw).map(([k, v]) => [k, v > 0 ? 1 : 0])) : ownRaw;
-    const believers = carry ? (state.prestige.legacy.disciples || []).slice(0, 1) : gen.disciples.filter((d) => d.status === 'trained').map((d) => d.id);
+    const believers = (carry ? (state.prestige.legacy.disciples || []).slice(0, 1) : gen.disciples.filter((d) => d.status === 'trained').map((d) => d.id)).slice(0, 3);
     this.queue(feet + 20, 'props', own, wp);
     if (state.phase === 'gen1') {
       this.queue(feet + 21, 'supplies', gen.upgrades, 'front');
@@ -887,7 +887,7 @@ export class Renderer {
     }
     // The ministry lives on the FAR side of the street, in front of the shopfronts, so the near pavement stays clear for tapping.
     const tables = visualCounts(own.streetTeam || 0).tables;
-    const converts = state.phase === 'gen1' ? gen.conversionState.converts.slice(0, 3) : [];
+    const converts = state.phase === 'gen1' ? gen.conversionState.converts.slice(0, 2) : [];
     const slots = this.helperSlots(tables, believers.length, converts.length);
     this.slots = slots;
     slots.tables.forEach((sl, i) => this.queue(sl.y + 0.2, 'table', i, sl));

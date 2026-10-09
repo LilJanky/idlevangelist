@@ -90,6 +90,7 @@ export class CrowdSystem {
     p.done = false;
     p.tag = tag;
     p.goalX = goalX;
+    p.arriving = true; // still off screen, on its way in: not cleaned up until it has been seen
     p.holdFor = holdFor;
     p.hold = false;
     return p;
@@ -100,9 +101,8 @@ export class CrowdSystem {
     const dir = this.rng() < 0.5 ? 1 : -1;
     let n = 0;
     for (let i = 0; i < count; i++) {
-      const lead = count - 1 - i; // the first to arrive walks furthest in
-      const goal = dir > 0 ? 0.1 + 0.042 * lead : 0.9 - 0.042 * lead;
-      const p = this.enter(dir, { goalX: goal, holdFor: 99, life, speedMult, lane: i % 3, offset: 0.045 * i, tag, capBonus });
+      // nobody stops: the pack steps off together and walks through the street at an easy pace, open the whole way
+      const p = this.enter(dir, { life, speedMult: speedMult * 0.7, lane: i % 3, offset: 0.05 * i, tag, capBonus });
       if (!p) break;
       n++;
     }
@@ -133,8 +133,8 @@ export class CrowdSystem {
     const first = this.rng() < 0.5 ? 1 : -1;
     for (let i = 0; i < count; i++) {
       const side = i % 2 === 0 ? first : -first;
-      const goal = spread[0] + ((spread[1] - spread[0]) * (i + 0.5)) / count + (this.rng() - 0.5) * 0.04;
-      const p = this.enter(side, { goalX: goal, holdFor: 99, life, speedMult: 1, lane: i % 3, offset: 0.06 * Math.floor(i / 2), tag, capBonus });
+      // nobody stops: a few people drift in from both sides, unhurried, with a long open moment
+      const p = this.enter(side, { life, speedMult: 0.55, lane: i % 3, offset: 0.1 * Math.floor(i / 2), tag, capBonus });
       if (!p) break;
       n++;
     }
@@ -259,7 +259,8 @@ export class CrowdSystem {
       }
       if (!markAll && p.opp && p.oppLeft > 50) p.oppLeft = 3;
       const offscreen = p.x < -0.12 || p.x > 1.12;
-      const entering = p.goalX != null && ((p.x < 0.5 && p.dir > 0) || (p.x > 0.5 && p.dir < 0)); // still on its way in
+      if (p.arriving && p.x > 0.02 && p.x < 0.98) p.arriving = false;
+      const entering = !!p.arriving || (p.goalX != null && ((p.x < 0.5 && p.dir > 0) || (p.x > 0.5 && p.dir < 0))); // still on its way in
       if ((offscreen && !entering) || (!entering && this.peds.length > cap && !p.standing && (p.x < 0.02 || p.x > 0.98))) {
         this.peds[i] = this.peds[this.peds.length - 1];
         this.peds.pop();

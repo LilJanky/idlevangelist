@@ -37,22 +37,22 @@ test('nobody appears out of thin air: every kind of gathering walks in from off 
     const onScreen = game.crowd.peds.filter((p) => p.x > 0.0 && p.x < 1.0);
     assert.equal(onScreen.length, 0, `${kind}: someone appeared on screen`);
     const fastest = BALANCE.crowd.speed[1] / 100;
-    for (const p of game.crowd.peds) assert.ok(p.speed <= fastest * (BALANCE.crowdEvents.shapes[kind].speedMult || 1) + 1e-9 && p.speed >= BALANCE.crowd.speed[0] / 100 - 1e-9, `${kind}: walks at an ordinary pace (${p.speed})`);
+    for (const p of game.crowd.peds) assert.ok(p.speed <= fastest * (BALANCE.crowdEvents.shapes[kind].speedMult || 1) + 1e-9 && p.speed > 0, `${kind}: walks at an ordinary pace (${p.speed})`);
   }
 });
 
-test('bus: a pack walks in together on one side, clusters near where it got in, stays a while, then walks on', () => {
+test('bus: a pack walks in together on one side, open the whole way, and nobody ever stops', () => {
   const game = setup();
   const got = game.startCrowdEvent('bus');
   assert.ok(got.count >= SHAPES.bus.size[0] && got.count <= SHAPES.bus.size[1] + game.mods.eventSize);
-  run(game, 4.5);
-  assert.ok(game.crowd.openPeds().length >= got.count - 1, 'all open at the same moment');
+  run(game, 7);
+  assert.ok(game.crowd.openPeds().length >= got.count - 2, 'nearly all open at the same moment');
   const xs = game.crowd.peds.map((p) => p.x);
-  assert.ok(Math.max(...xs) - Math.min(...xs) < 0.45, 'a tight group');
-  assert.ok(game.crowd.peds.filter((p) => p.hold).length >= got.count - 1, 'standing where they stopped');
+  assert.ok(Math.max(...xs) - Math.min(...xs) < 0.6, 'a group');
+  assert.equal(game.crowd.peds.filter((p) => p.hold || p.standing).length, 0, 'nobody stands still');
   assert.equal(game.eventWindowMult, 1);
-  run(game, 25);
-  assert.equal(game.crowd.peds.filter((p) => p.tag === 'bus').length, 0, 'and then they walk on');
+  run(game, 30);
+  assert.equal(game.crowd.peds.filter((p) => p.tag === 'bus').length, 0, 'and then they have walked on');
 });
 test('lunch: a stream, one person after another from both sides, and your run holds longer meanwhile', () => {
   const game = setup('lunch');
@@ -94,7 +94,7 @@ test('school: two fast waves, one from each side', () => {
   assert.ok(waves.every((w) => w.speed >= 0.1 * SHAPES.school.speedMult - 1e-9), 'they hurry');
 });
 
-test('rain: a few people linger across the street with long moments, and someone who wants to talk follows soon', () => {
+test('rain: a few people drift across the street unhurried with long moments, and someone who wants to talk follows soon', () => {
   const game = setup('rain');
   const gen = game.state.gen;
   gen.totalSeeds = BALANCE.specials.unlockSeeds + 1;
@@ -103,9 +103,10 @@ test('rain: a few people linger across the street with long moments, and someone
   assert.ok(got.count >= SHAPES.rain.size[0]);
   assert.ok(game.crowd.peds.every((p) => p.oppLeft >= SHAPES.rain.life[0]), 'long moments');
   assert.ok(game.specialTimer <= SHAPES.rain.talkIn);
-  run(game, 9);
+  run(game, 7);
+  assert.equal(game.crowd.peds.filter((p) => p.hold || p.standing).length, 0, 'nobody stands still');
   const xs = game.crowd.peds.map((p) => p.x).sort();
-  assert.ok(xs[xs.length - 1] - xs[0] > 0.3, 'spread across the street');
+  assert.ok(xs[xs.length - 1] - xs[0] > 0.1, 'spread across the street');
   game.specialTimer = SHAPES.rain.talkIn;
   run(game, SHAPES.rain.talkIn + 1);
   assert.ok(game.crowd.specials.length > 0 || game.enc, 'someone came to talk');
