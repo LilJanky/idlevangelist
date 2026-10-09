@@ -40,7 +40,7 @@ export const BALANCE = {
     // Tapping where no one is open to a moment (once the run is worth protecting) costs part of it, so a run is kept by being on target.
     conversationStreakBonus: 2,
     minEngageGap: 0.08, // anti-macro guard (seconds)
-    hitRadiusPx: 42,
+    hitRadiusPx: 48,
     momentum: {
       max: 100,
       perEngage: 1.6,

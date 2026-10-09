@@ -524,7 +524,7 @@ After the experiments with authored sheets (a hosted image generator gave blurry
 
 **No more stopping, capped background.** Ordinary people never stand still any more: the bus pack now steps off together and walks through the street at an easy pace (open the whole way) and the rain gathering is a few people drifting in unhurried (long open moments); neither stops. Only the church friends (not tappable, far side of the street) and the lecture crowd during the Professor stand. Measured over simulated 28-minute runs, people standing still outside the Professor: 0.02-0.07 on screen on average (it was 0.23-0.25 before and 0.5-0.65 before that), with 9-10 people on screen on average and a peak of 17-19. Background ministry: the street team is capped at two tables (one at 1 owned, a second at 10), at most three trained disciples are drawn at the tables, and at most two converts, so the far side of the street can never fill up however far a run goes.
 
-**Miss mechanic removed, bigger tap targets.** Tapping the street where nobody is open no longer costs any of your run (`missPenalty`, `missTap`, the MISS floater and sound and its hint are gone; the streak still fades if you stop working the street). The tap radius on people rose from 34 to 42 CSS pixels. Simulated balance is unchanged (hybrid finishes at about 25 minutes).
+**Miss mechanic removed, bigger tap targets.** Tapping the street where nobody is open no longer costs any of your run (`missPenalty`, `missTap`, the MISS floater and sound and its hint are gone; the streak still fades if you stop working the street). The tap radius on people rose from 34 to 48 CSS pixels. Simulated balance is unchanged (hybrid finishes at about 25 minutes).
 
 ## Crowd density
 
