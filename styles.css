@@ -35,7 +35,7 @@ button { font-family: inherit; color: inherit; cursor: pointer; }
 
 /* ---- HUD ---- */
 #hud {
-  flex: 0 0 auto; display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr) 66px; align-items: stretch; gap: 6px;
+  flex: 0 0 auto; display: grid; grid-template-columns: 9.25rem minmax(0, 1fr) 66px; /* the Seeds plate is a fixed width so it never changes size as the number moves */ align-items: stretch; gap: 6px;
   grid-template-areas:
     'seeds meta menu'
     'street street street';
@@ -342,7 +342,7 @@ body.reduce-motion #montage .beat, body.reduce-motion #montage .title { animatio
   .stat-value { font-size: 15px; }
 }
 @media (max-width: 360px) {
-  #hud { grid-template-columns: minmax(76px, auto) minmax(0, 1fr) 58px; gap: 4px; padding-left: 5px; padding-right: 5px; }
+  #hud { grid-template-columns: 7.5rem minmax(0, 1fr) 58px; gap: 4px; padding-left: 5px; padding-right: 5px; }
   #btn-settings { min-width: 58px; font-size: 9px; }
   #street-hud { gap: 3px; }
   .sh-streak, .sh-momentum { gap: 4px; padding-left: 5px; padding-right: 5px; }
@@ -1065,4 +1065,5 @@ html.text-large #hud .stat-value { font-size: 21px; }
 #stage { position: absolute; left: 0; right: 0; bottom: 0; height: var(--stage-h, 100%); will-change: transform; }
 #stage #world { position: absolute; inset: 0; }
 #stage #floaters { position: absolute; inset: 0; }
-
+#stat-seeds { min-width: 0; overflow: hidden; }
+#stat-seeds .stat-rate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
