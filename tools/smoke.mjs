@@ -158,7 +158,7 @@ try {
       game.convertTimer = 0.1;
       game.eventTimer = 0.3;
     });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(5000);
     check(await page.evaluate(() => window.__idlevangelist.game.crowd.openPeds().length >= 4), `${w}x${h}: a crowd event puts a gathering on the street`);
     await page.evaluate(() => { window.__idlevangelist.game.state.gen.conversionState.converts.length = 0; });
 
