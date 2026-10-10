@@ -815,7 +815,7 @@ export class Renderer {
     let best = null;
     let bestD = radiusPx;
     for (const p of this.game.crowd.peds) {
-      if (!p.opp || p.done || p.x < 0.02 || p.x > 0.98) continue;
+      if (!p.opp || p.done || p.x < -0.03 || p.x > 1.03) continue;
       const cx = p.x * this.W * this.scale;
       const cy = (this.pedFeet(p) - 12) * this.scale;
       const d = Math.hypot(px - cx, py - cy);

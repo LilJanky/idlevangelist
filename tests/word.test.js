@@ -658,3 +658,13 @@ test('saying a line: the person replies to exactly that line; a human line does 
   assert.ok(bare.sayLine(lineOf(enc, 'direct')));
   assert.equal(bare.sayLine('zzz'), null, 'a line that was not offered cannot be said');
 });
+
+test('a street WORD reaches people who are only half walked on at either edge, and not people fully off screen', () => {
+  const game = newGame('edges');
+  const mk = (id, x) => ({ id, x, lane: 1, dir: 1, speed: 0.1, standing: false, hold: false, opp: true, oppLeft: 60, done: false, react: 0, phase: 0, look: 1 });
+  game.crowd.peds.length = 0;
+  game.crowd.spawnTimer = 1e9;
+  game.crowd.peds.push(mk(901, 0.0), mk(902, 1.0), mk(903, 0.5), mk(904, -0.2), mk(905, 1.2));
+  const ids = game.crowd.openPeds().map((p) => p.id).sort();
+  assert.deepEqual(ids, [901, 902, 903], 'half on at the left and right edges counts; fully off screen does not');
+});

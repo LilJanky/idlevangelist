@@ -163,18 +163,19 @@ export class CrowdSystem {
     if (!p.opp || p.done) return 0;
     const hold = p.oppLeft > 50 ? Infinity : p.oppLeft / Math.max(0.05, oppDecay);
     const speed = p.standing ? 0 : p.speed * speedScale;
-    const edge = speed > 0 ? (p.dir > 0 ? 0.97 - p.x : p.x - 0.03) / speed : Infinity;
+    const edge = speed > 0 ? (p.dir > 0 ? 1.04 - p.x : p.x + 0.04) / speed : Infinity;
     return Math.max(0, Math.min(hold, edge));
   }
 
   /** Pedestrians who are open to a moment and on screen: the people a street WORD reaches. */
   openPeds() {
-    return this.peds.filter((p) => p.opp && !p.done && p.x > 0.03 && p.x < 0.97);
+    // anyone whose body is at all on screen counts, including someone only half walked on (a sprite is about 0.18 wide)
+    return this.peds.filter((p) => p.opp && !p.done && p.x > -0.04 && p.x < 1.04);
   }
 
   /** People on screen who are not open to a moment: they still hear a proclamation, at a reduced rate (once each). */
   bystanders() {
-    return this.peds.filter((p) => !p.opp && !p.done && !p.heard && !p.far && p.x > 0.03 && p.x < 0.97);
+    return this.peds.filter((p) => !p.opp && !p.done && !p.heard && !p.far && p.x > -0.04 && p.x < 1.04);
   }
 
   /** Number of pedestrians currently carrying a tappable opportunity. */

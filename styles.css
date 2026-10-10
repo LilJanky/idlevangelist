@@ -1067,3 +1067,9 @@ html.text-large #hud .stat-value { font-size: 21px; }
 #stage #floaters { position: absolute; inset: 0; }
 #stat-seeds { min-width: 0; overflow: hidden; }
 #stat-seeds .stat-rate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* a passage that was tried against this argument and did not fit is greyed out (still readable) so it is not spammed */
+.verse-btn.spent, .verse-btn.spent:disabled { background: #b9b2a2; border-color: #5a5044; box-shadow: inset 0 0 0 1px #8f8676; opacity: 1; }
+.verse-btn.spent .v-ref { color: #2a241a; }
+.verse-btn.spent .v-short { display: none; }
+.verse-btn.spent .v-fit { position: static; display: inline-block; margin-top: 3px; background: #4a4238; color: #f4ead4; }
+.verse-btn.spent .cd { display: none; }

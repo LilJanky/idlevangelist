@@ -136,7 +136,7 @@ test('holding WORD shows its cost: how long each open moment has, whether the ma
   // while WORD is ready markers decay slower and people walk slower
   const decay = W.readyHoldMult;
   assert.ok(Math.abs(g.pedTimeLeft(fading) - 0.9 / decay) < 1e-9);
-  const expectWalk = (0.97 - 0.8) / (0.1 * W.readyPaceMult);
+  const expectWalk = (1.04 - 0.8) / (0.1 * W.readyPaceMult); // they stay open until they have walked right off the edge
   assert.ok(Math.abs(g.pedTimeLeft(walking) - expectWalk) < 1e-9);
   assert.ok(g.pedTimeLeft(steady) > 30);
   const out = g.crowdOutlook;

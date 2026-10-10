@@ -96,6 +96,8 @@ for (const [w, h, large] of [[390, 844, false], [320, 568, false], [390, 844, tr
   await page.waitForTimeout(1500); await check('professor argument');
   await page.evaluate(() => { const { game } = window.__idlevangelist; game.castWord('romans1_20'); });
   await page.waitForTimeout(250); await check('professor hit');
+  await page.waitForTimeout(1500); await page.evaluate(() => { window.__idlevangelist.game.castWord('john14_6'); }); // a passage that does not fit this argument gets greyed out
+  await page.waitForTimeout(400); await check('professor spent passage');
   await page.evaluate(() => { window.__idlevangelist.game.failBoss(); window.__idlevangelist.game.endBossSession(); });
   await page.evaluate(() => { const { game } = window.__idlevangelist; game.state.gen.bossState.status = 'available'; game.challengeBoss(); game.boss.stage = 'victory'; game.finishBossVictory(); });
   await page.waitForTimeout(2000); await page.locator('#overlay .modal').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(600); await check('generation complete');

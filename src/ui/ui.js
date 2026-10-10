@@ -489,7 +489,14 @@ export class UI {
     game.proclaimStreet();
   }
 
+  /** A passage tried against the current argument that did not speak to it (not direct or contextual) is set aside for that argument. */
+  verseSpent(id) {
+    const g = this.verseTried?.[id];
+    return !!g && g !== 'direct' && g !== 'contextual';
+  }
+
   castVerse(id) {
+    if (this.verseSpent(id)) return; // already tried against this argument and it did not fit
     const r = this.game.castWord(id);
     if (r) {
       this.cdTotal[id] = this.game.cool.words[id];
@@ -1501,8 +1508,9 @@ export class UI {
         const v = SCRIPTURES[id];
         const cd = h('i', { class: 'cd' });
         const grade = tried[id];
-        const fitText = grade === 'direct' ? 'Direct' : grade === 'contextual' ? 'Fits' : grade ? 'Tried' : '';
-        const btn = h('button', { class: `verse-btn${grade === 'direct' || grade === 'contextual' ? ' fits' : ''}`, type: 'button', title: v.useful, 'aria-label': `${v.ref}: ${v.name}. ${v.useful}${fitText ? ` Last time: ${fitText}.` : ''}`, on: { click: () => this.castVerse(id) } },
+        const spent = this.verseSpent(id);
+        const fitText = grade === 'direct' ? 'Direct' : grade === 'contextual' ? 'Fits' : grade ? 'Not a fit' : '';
+        const btn = h('button', { class: `verse-btn${grade === 'direct' || grade === 'contextual' ? ' fits' : ''}${spent ? ' spent' : ''}`, type: 'button', title: v.useful, 'aria-label': `${v.ref}: ${v.name}. ${v.useful}${fitText ? ` Tried against this argument: ${fitText}.` : ''}${spent ? ' Set aside for this argument.' : ''}`, on: { click: () => this.castVerse(id) } },
           h('span', { class: 'v-ref', text: v.ref }), h('span', { class: 'v-short', text: v.short }), fitText ? h('span', { class: 'v-fit', text: fitText }) : null, cd);
         this.trayButtons[id] = { btn, cd };
         els.tray.append(btn);
@@ -1511,7 +1519,7 @@ export class UI {
     for (const [id, ref] of Object.entries(this.trayButtons)) {
       const def = BALANCE.scripture.verses[id];
       const cd = game.cool.words[id] || 0;
-      ref.btn.disabled = cd > 0.05 || game.cool.shared > 0.05 || !pressing;
+      ref.btn.disabled = cd > 0.05 || game.cool.shared > 0.05 || !pressing || this.verseSpent(id);
       this.setCd(ref.cd, cd, this.cdTotal[id] || def.cooldown);
     }
   }
