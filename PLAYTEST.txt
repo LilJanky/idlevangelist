@@ -1,0 +1,18 @@
+﻿IDLEVANGELIST - PLAYTEST
+========================
+
+To play: double-click  play.html  (Chrome, Edge, Firefox or Safari). Nothing to install, no internet needed.
+It is made for a phone-sized screen. On a computer, resize the window narrow, or use your browser's phone view (F12, then the phone icon).
+
+Phone: send play.html to yourself and open it in the browser, or put the file on any web host.
+Sound: tap once on the page to let the browser start audio.
+Saving: your progress saves in the browser automatically. "Menu" has Save now and Reset all progress.
+Large text: Menu > Text size.
+
+What I would love to hear:
+- Where did you get stuck, bored, or confused?
+- Did you understand what to tap, and what Proclaim the Word does?
+- How long did it take to reach the Professor, and to reach Next Generation (about 25-35 minutes is the goal)?
+- Anything that looked broken, unreadable, or jumped around on screen.
+
+The full game files are in this folder too; "npm start" runs them on a local server, and "npm run build" rebuilds play.html.
